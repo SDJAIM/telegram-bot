@@ -1,0 +1,10 @@
+*{
+  box-sizing: border-box;
+}
+
+body{
+  margin: 0;
+  background-color: #1b0044;
+  color: white;
+}
+
