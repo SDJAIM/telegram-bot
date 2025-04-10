@@ -1,4 +1,4 @@
-class Main extends HTMLElement {
+class Title extends HTMLElement {
   constructor () {
     super()
     this.shadow = this.attachShadow({ mode: 'open' })
@@ -12,23 +12,18 @@ class Main extends HTMLElement {
 
   render () {
     this.shadow.innerHTML =
-      /*html*/`
+      /* html */`
       <style>
-
-      main{
-        display: grid;
-        gap: 2rem;
-        grid-template-columns: 2fr 4fr;
-        padding: 0 2%;
+      .title h1{
+        font-family: Roboto, "Helvetica Neue", Arial;
+        margin: 0;
       }
-
       </style>
-      
-      <main>
-        <slot></slot>
-      </main>
+      <div class="title">
+        <h1><slot>Pedidos</slot></h1>
+      </div>
       `
   }
 }
 
-customElements.define('main-component', Main)
+customElements.define('title-component', Title)

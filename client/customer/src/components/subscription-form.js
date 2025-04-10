@@ -1,5 +1,4 @@
 class SubscriptionForm extends HTMLElement {
-
   constructor () {
     super()
     this.shadow = this.attachShadow({ mode: 'open' })
@@ -7,7 +6,7 @@ class SubscriptionForm extends HTMLElement {
   }
 
   async connectedCallback () {
-    await this.loadData() 
+    await this.loadData()
     await this.render()
   }
 
@@ -24,7 +23,7 @@ class SubscriptionForm extends HTMLElement {
 
   render () {
     this.shadow.innerHTML =
-    /*html*/`
+    /* html */`
     <style>
 
       *{
@@ -283,4 +282,4 @@ class SubscriptionForm extends HTMLElement {
   }
 }
 
-customElements.define('subscription-form-component', SubscriptionForm);
+customElements.define('subscription-form-component', SubscriptionForm)

@@ -1,18 +1,18 @@
 class Header extends HTMLElement {
-  constructor() {
+  constructor () {
     super()
     this.shadow = this.attachShadow({ mode: 'open' })
   }
 
-  static get observedAttributes() { }
+  static get observedAttributes () { }
 
-  connectedCallback() {
+  connectedCallback () {
     this.render()
   }
 
-  render() {
+  render () {
     this.shadow.innerHTML =
-      /*html*/`
+      /* html */`
       <style>
 
           header{ 

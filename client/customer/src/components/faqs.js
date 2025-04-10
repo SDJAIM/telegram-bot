@@ -1,37 +1,36 @@
 class Faqs extends HTMLElement {
-
-  constructor() {
+  constructor () {
     super()
     this.shadow = this.attachShadow({ mode: 'open' })
 
     this.data = []
   }
 
-  async connectedCallback() {
+  async connectedCallback () {
     await this.loadData()
     await this.render()
   }
 
-  async loadData() {
+  async loadData () {
     this.data = [
       {
-        title: "¿Qué elementos principales se incluyen en el diseño de un sitio web personalizado?",
-        content: "Lorem 2 ipsum dolor sit amet consectetur adipisicing elit. Dolores praesentium ratione itaque earum aperiam aliquam, error culpa fugiat ea corporis impedit. Ea illo et facilis nulla esse distinctio iste nesciunt."
+        title: '¿Qué elementos principales se incluyen en el diseño de un sitio web personalizado?',
+        content: 'Lorem 2 ipsum dolor sit amet consectetur adipisicing elit. Dolores praesentium ratione itaque earum aperiam aliquam, error culpa fugiat ea corporis impedit. Ea illo et facilis nulla esse distinctio iste nesciunt.'
       },
       {
-        title: "¿Cuáles son los principios más importantes del diseño de sitios web?",
-        content: "Lorem 3 ipsum dolor sit amet consectetur adipisicing elit. Dolores praesentium ratione itaque earum aperiam aliquam, error culpa fugiat ea corporis impedit. Ea illo et facilis nulla esse distinctio iste nesciunt."
+        title: '¿Cuáles son los principios más importantes del diseño de sitios web?',
+        content: 'Lorem 3 ipsum dolor sit amet consectetur adipisicing elit. Dolores praesentium ratione itaque earum aperiam aliquam, error culpa fugiat ea corporis impedit. Ea illo et facilis nulla esse distinctio iste nesciunt.'
       },
       {
-        title: "¿Qué pasos incluye el proceso de diseño web profesional?",
-        content: "Lorem 3 ipsum dolor sit amet consectetur adipisicing elit. Dolores praesentium ratione itaque earum aperiam aliquam, error culpa fugiat ea corporis impedit. Ea illo et facilis nulla esse distinctio iste nesciunt."
+        title: '¿Qué pasos incluye el proceso de diseño web profesional?',
+        content: 'Lorem 3 ipsum dolor sit amet consectetur adipisicing elit. Dolores praesentium ratione itaque earum aperiam aliquam, error culpa fugiat ea corporis impedit. Ea illo et facilis nulla esse distinctio iste nesciunt.'
       }
     ]
   }
 
-  render() {
+  render () {
     this.shadow.innerHTML =
-    /*html*/`
+    /* html */`
     <style>
 
       *{
@@ -140,7 +139,7 @@ class Faqs extends HTMLElement {
       const faqButton = document.createElement('div')
       faqButton.classList.add('faq-button')
       summary.appendChild(faqButton)
-      
+
       faqButton.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
                   <title>plus</title>
                   <path d="M19,13H13V19H11V13H5V11H11V5H13V11H19V13Z" />
@@ -153,4 +152,4 @@ class Faqs extends HTMLElement {
   }
 }
 
-customElements.define('faqs-component', Faqs);
+customElements.define('faqs-component', Faqs)

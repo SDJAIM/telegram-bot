@@ -1,30 +1,30 @@
 class Table extends HTMLElement {
-  constructor() {
+  constructor () {
     super()
     this.shadow = this.attachShadow({ mode: 'open' })
   }
 
-  static get observedAttributes() { }
+  static get observedAttributes () { }
 
-  connectedCallback() {
+  connectedCallback () {
     this.logData()
     this.render()
   }
 
-  logData() {
+  logData () {
     this.data = [
       {
-        name: "Carlos",
-        email: "carlossedagambin@gmail.com",
-        createdAt: "2024-04-22",
-        updatedAt: "2024-04-22",
+        name: 'Carlos',
+        email: 'carlossedagambin@gmail.com',
+        createdAt: '2024-04-22',
+        updatedAt: '2024-04-22',
       }
     ]
   }
 
-  render() {
+  render () {
     this.shadow.innerHTML =
-      /*html*/`
+      /* html */`
 <style>
       .table {
         display: flex;
@@ -147,7 +147,6 @@ class Table extends HTMLElement {
     const tableBody = this.shadow.querySelector('.table-body')
 
     this.data.forEach(register => {
-
       const tableRegister = document.createElement('div')
       tableRegister.classList.add('table-register')
       tableBody.appendChild(tableRegister)
@@ -194,7 +193,6 @@ class Table extends HTMLElement {
       tableRegisterBodyList.appendChild(updatedAtLi)
     }
     )
-
   }
 }
 

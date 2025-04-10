@@ -12,7 +12,7 @@ class Menu extends HTMLElement {
 
   render () {
     this.shadow.innerHTML =
-      /*html*/`
+      /* html */`
       <style>
 
       .menu-button svg{
@@ -28,5 +28,5 @@ class Menu extends HTMLElement {
       </section>`
   }
 }
-      
+
 customElements.define('menu-component', Menu)

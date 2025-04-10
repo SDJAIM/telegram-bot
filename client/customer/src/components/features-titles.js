@@ -1,5 +1,4 @@
 class FeaturesTitles extends HTMLElement {
-
   constructor () {
     super()
     this.shadow = this.attachShadow({ mode: 'open' })
@@ -10,23 +9,23 @@ class FeaturesTitles extends HTMLElement {
     await this.render()
   }
 
-  async loadData() {
+  async loadData () {
     this.data = [
       {
-        title: "Filtra",
+        title: 'Filtra',
       },
       {
-        title: "Automatiza",
+        title: 'Automatiza',
       },
       {
-        title: "Ahorra",
+        title: 'Ahorra',
       }
     ]
   }
-  
+
   render () {
     this.shadow.innerHTML =
-    /*html*/`
+    /* html */`
     <style>
 
       *{
@@ -123,4 +122,4 @@ class FeaturesTitles extends HTMLElement {
   }
 }
 
-customElements.define('features-titles-component', FeaturesTitles);
+customElements.define('features-titles-component', FeaturesTitles)

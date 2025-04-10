@@ -1,0 +1,30 @@
+{
+  "name": "telegram-bot",
+  "version": "1.0.0",
+  "description": "API para atender las llamadas a un bot de Telegram",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node --env-file=.env index.js",
+    "dev": "node --env-file=.env --watch index.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/SDJAIM/telegram-bot.git"
+  },
+  "keywords": [
+    "telegram",
+    "bot",
+    "api"
+  ],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/SDJAIM/telegram-bot/issues"
+  },
+  "homepage": "https://github.com/SDJAIM/telegram-bot#readme",
+  "devDependencies": {
+    "eslint": "^9.24.0",
+    "neostandard": "^0.12.1"
+  }
+}

@@ -1,5 +1,4 @@
 class Hero extends HTMLElement {
-
   constructor () {
     super()
     this.shadow = this.attachShadow({ mode: 'open' })
@@ -13,15 +12,15 @@ class Hero extends HTMLElement {
 
   loadData () {
     this.data = {
-      title: "Un bot de Telegram para buscar tus productos favoritos",
-      description: "Ahorra dinero perfeccionando y automatizando tus búsquedas gracias a nuestra IA.",
-      buttonText: "Comenzar"
+      title: 'Un bot de Telegram para buscar tus productos favoritos',
+      description: 'Ahorra dinero perfeccionando y automatizando tus búsquedas gracias a nuestra IA.',
+      buttonText: 'Comenzar'
     }
   }
-  
+
   render () {
     this.shadow.innerHTML =
-    /*html*/`
+    /* html */`
     <style>
 
       *{
@@ -414,4 +413,4 @@ class Hero extends HTMLElement {
   }
 }
 
-customElements.define('hero-component', Hero);
+customElements.define('hero-component', Hero)

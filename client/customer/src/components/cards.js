@@ -1,5 +1,4 @@
 class Cards extends HTMLElement {
-
   constructor () {
     super()
     this.shadow = this.attachShadow({ mode: 'open' })
@@ -9,7 +8,7 @@ class Cards extends HTMLElement {
     await this.loadData()
     await this.render()
   }
-  
+
   async loadData () {
     this.data = {
       title: 'Fácil de usar',
@@ -55,10 +54,9 @@ class Cards extends HTMLElement {
     }
   }
 
-
   render () {
     this.shadow.innerHTML =
-    /*html*/`
+    /* html */`
     <style>
 
       *{
@@ -324,4 +322,4 @@ class Cards extends HTMLElement {
   }
 }
 
-customElements.define('cards-component', Cards);
+customElements.define('cards-component', Cards)
