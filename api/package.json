@@ -26,5 +26,8 @@
   "devDependencies": {
     "eslint": "^9.24.0",
     "neostandard": "^0.12.1"
+  },
+  "dependencies": {
+    "express": "^5.1.0"
   }
 }
