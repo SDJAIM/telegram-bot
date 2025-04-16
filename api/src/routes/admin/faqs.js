@@ -1,30 +1,11 @@
 const express = require('express')
 const router = express.Router()
+const controller = require('../../controllers/admin/faqs-controller.js')
 
-router.post('/', (req, res) => {
-  console.log(req.body)
-  res.send('POST request to the homepage')
-})
-
-router.get('/', (req, res) => {
-  console.log(req.query)
-  res.send('GET request to the homepage')
-})
-
-router.get('/:id', (req, res) => {
-  console.log(req.params.id)
-  res.send('GET request to the homepage')
-})
-
-router.put('/:id', (req, res) => {
-  console.log(req.params.id)
-  console.log(req.body)
-  res.send('PUT request to the homepage')
-})
-
-router.delete('/:id', (req, res) => {
-  console.log(req.params.id)
-  res.send('DELETE request to the homepage')
-})
+router.post('/', controller.create)
+router.get('/', controller.findAll)
+router.get('/:id', controller.findOne)
+router.put('/:id', controller.update)
+router.delete('/:id', controller.delete)
 
 module.exports = router
