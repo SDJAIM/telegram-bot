@@ -25,9 +25,12 @@
   "homepage": "https://github.com/SDJAIM/telegram-bot#readme",
   "devDependencies": {
     "eslint": "^9.24.0",
-    "neostandard": "^0.12.1"
+    "neostandard": "^0.12.1",
+    "sequelize-cli": "^6.6.2"
   },
   "dependencies": {
-    "express": "^5.1.0"
+    "express": "^5.1.0",
+    "mysql2": "^3.14.0",
+    "sequelize": "^6.37.7"
   }
 }
