@@ -16,7 +16,7 @@ module.exports = (err, req, res, next) => {
   }
 
   const statusCode = err.statusCode || 500
-  const message = err.message || 'Ha ocurrido un error inesperado en el servidor.'
+  const message = statusCode === 422 ? err.errors : err.message || 'Ha ocurrido un error inesperado en el servidor.'
 
   res.status(statusCode).json({
     error: true,

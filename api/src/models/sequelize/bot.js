@@ -1,11 +1,23 @@
 module.exports = function (sequelize, DataTypes) {
-  const Model = sequelize.define('User',
+  const Model = sequelize.define('bot',
     {
       id: {
         type: DataTypes.INTEGER,
         autoIncrement: true,
         primaryKey: true,
         allowNull: false
+      },
+      platform: {
+        type: DataTypes.STRING,
+        allowNull: false,
+        velidate: {
+          notNull: {
+            msg: 'Por favor, rellena el campo "Plataforma".'
+          },
+          notEmpty: {
+            msg: 'Por favor, rellena el campo "Plataforma".'
+          }
+        }
       },
       name: {
         type: DataTypes.STRING,
@@ -19,19 +31,27 @@ module.exports = function (sequelize, DataTypes) {
           }
         }
       },
-      email: {
+      description: {
         type: DataTypes.STRING,
         allowNull: false,
         validate: {
-          isEmail: {
-            args: true,
-            msg: 'Debe ser um e-mail válido'
-          },
           notNull: {
-            msg: 'Por favor, rellena el campo "Email".'
+            msg: 'Por favor, rellena el campo "Descripción".'
           },
           notEmpty: {
-            msg: 'Por favor, rellena el campo "Email".'
+            msg: 'Por favor, rellena el campo "Descripción".'
+          }
+        }
+      },
+      token: {
+        type: DataTypes.STRING,
+        allowNull: false,
+        validate: {
+          notNull: {
+            msg: 'Por favor, rellena el campo "Token".'
+          },
+          notEmpty: {
+            msg: 'Por favor, rellena el campo "Token".'
           }
         }
       },
@@ -53,7 +73,7 @@ module.exports = function (sequelize, DataTypes) {
       }
     }, {
       sequelize,
-      tableName: 'users',
+      tableName: 'customers',
       timestamps: true,
       paranoid: true,
       indexes: [

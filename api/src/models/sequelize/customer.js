@@ -1,5 +1,5 @@
 module.exports = function (sequelize, DataTypes) {
-  const Model = sequelize.define('User',
+  const Model = sequelize.define('Customer',
     {
       id: {
         type: DataTypes.INTEGER,
@@ -9,31 +9,24 @@ module.exports = function (sequelize, DataTypes) {
       },
       name: {
         type: DataTypes.STRING,
-        allowNull: false,
-        validate: {
-          notNull: {
-            msg: 'Por favor, rellena el campo "Nombre".'
-          },
-          notEmpty: {
-            msg: 'Por favor, rellena el campo "Nombre".'
-          }
-        }
+        allowNull: false
       },
       email: {
         type: DataTypes.STRING,
         allowNull: false,
-        validate: {
-          isEmail: {
-            args: true,
-            msg: 'Debe ser um e-mail válido'
-          },
-          notNull: {
-            msg: 'Por favor, rellena el campo "Email".'
-          },
-          notEmpty: {
-            msg: 'Por favor, rellena el campo "Email".'
-          }
-        }
+        unique: true
+      },
+      telephone: {
+        type: DataTypes.STRING,
+        allowNull: false
+      },
+      prefix: {
+        type: DataTypes.STRING,
+        allowNull: false
+      },
+      birthdate: {
+        type: DataTypes.DATE,
+        allowNull: false
       },
       createdAt: {
         type: DataTypes.DATE,
@@ -53,7 +46,7 @@ module.exports = function (sequelize, DataTypes) {
       }
     }, {
       sequelize,
-      tableName: 'users',
+      tableName: 'customers',
       timestamps: true,
       paranoid: true,
       indexes: [
