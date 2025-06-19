@@ -6,26 +6,32 @@ class Table extends HTMLElement {
 
   static get observedAttributes () { }
 
-  connectedCallback () {
-    this.logData()
-    this.render()
+  async connectedCallback () {
+    await this.loadData()
+    await this.render()
   }
 
-  logData () {
-    this.data = [
-      {
-        name: 'Carlos',
-        email: 'carlossedagambin@gmail.com',
-        createdAt: '2024-04-22',
-        updatedAt: '2024-04-22',
+  async loadData () {
+    try {
+      const response = await fetch('/api/admin/users')
+
+      if (!response.ok) {
+        throw new Error(`Error fetching data: ${response.statusText}`)
       }
-    ]
+
+      this.data = await response.json()
+
+      console.log(this.data)
+    } catch (error) {
+      console.error('Error loading data:', error)
+      this.data = []
+    }
   }
 
   render () {
     this.shadow.innerHTML =
       /* html */`
-<style>
+    <style>
       .table {
         display: flex;
         flex-direction: column;
@@ -125,28 +131,28 @@ class Table extends HTMLElement {
       }
     </style>
       <section class="table">
-            <div class="table-header">
-                <div class="table-header-buttons">
-                    <div class="filter-button">
-                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><title>filter</title><path d="M14,12V19.88C14.04,20.18 13.94,20.5 13.71,20.71C13.32,21.1 12.69,21.1 12.3,20.71L10.29,18.7C10.06,18.47 9.96,18.16 10,17.87V12H9.97L4.21,4.62C3.87,4.19 3.95,3.56 4.38,3.22C4.57,3.08 4.78,3 5,3V3H19V3C19.22,3 19.43,3.08 19.62,3.22C20.05,3.56 20.13,4.19 19.79,4.62L14.03,12H14Z" /></svg>
-                    </div>
-                </div>
-            </div>
-            <div class="table-body"></div>
-            <div class="table-footer">
-                <div class="table-footer-info">
-                    <span>1 registro en total, mostrando 10 por página</span>
-                </div>
-                <div class="table-footer-pagination">
-                    <div class="table-footer-pagination-button"><<</div>
-                </div>
-            </div>
-      </section>
+        <div class="table-header">
+          <div class="table-header-buttons">
+              <div class="filter-button">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><title>filter</title><path d="M14,12V19.88C14.04,20.18 13.94,20.5 13.71,20.71C13.32,21.1 12.69,21.1 12.3,20.71L10.29,18.7C10.06,18.47 9.96,18.16 10,17.87V12H9.97L4.21,4.62C3.87,4.19 3.95,3.56 4.38,3.22C4.57,3.08 4.78,3 5,3V3H19V3C19.22,3 19.43,3.08 19.62,3.22C20.05,3.56 20.13,4.19 19.79,4.62L14.03,12H14Z" /></svg>
+              </div>
+          </div>
+        </div>
+        <div class="table-body"></div>
+        <div class="table-footer">
+          <div class="table-footer-info">
+            <span>${this.data.meta.total} registro en total, mostrando ${this.data.meta.size} por página</span>
+          </div>
+          <div class="table-footer-pagination">
+            <div class="table-footer-pagination-button"><<</div>
+          </div>
+        </div>
+    </section>
 `
 
     const tableBody = this.shadow.querySelector('.table-body')
 
-    this.data.forEach(register => {
+    this.data.rows.forEach(register => {
       const tableRegister = document.createElement('div')
       tableRegister.classList.add('table-register')
       tableBody.appendChild(tableRegister)
@@ -161,11 +167,13 @@ class Table extends HTMLElement {
 
       const editButton = document.createElement('div')
       editButton.classList.add('edit-button')
+      editButton.dataset.id = register.id
       tableRegisterHeaderButtons.appendChild(editButton)
       editButton.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><title>pencil</title><path d="M20.71,7.04C21.1,6.65 21.1,6 20.71,5.63L18.37,3.29C18,2.9 17.35,2.9 16.96,3.29L15.12,5.12L18.87,8.87M3,17.25V21H6.75L17.81,9.93L14.06,6.18L3,17.25Z" /></svg>'
 
       const deleteButton = document.createElement('div')
       deleteButton.classList.add('delete-button')
+      deleteButton.dataset.id = register.id
       tableRegisterHeaderButtons.appendChild(deleteButton)
       deleteButton.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><title>edit</title><path d="M19,4H15.5L14.5,3H9.5L8.5,4H5V6H19M6,19A2,2 0 0,0 8,21H16A2,2 0 0,0 18,19V7H6V19Z" /></svg>'
 

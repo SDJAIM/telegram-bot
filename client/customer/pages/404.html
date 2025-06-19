@@ -1,0 +1,92 @@
+  class NotFoundPage extends HTMLElement {
+        constructor () {
+          super()
+          this.shadow = this.attachShadow({ mode: 'open' })
+        }
+
+        connectedCallback () {
+          this.render()
+        }
+
+        render () {
+          this.shadow.innerHTML =
+          /* html */`
+          <style>
+            * {
+              box-sizing: border-box;
+            }
+
+            body, h1, h2, h3, h4, h5, h6, p, a, span, li, label, input, button {
+              font-family: "Nunito Sans", serif;
+              font-optical-sizing: auto;
+            }
+
+            .not-found-container {
+              align-items: center;
+              background-color: hsl(200, 77%, 52%);
+              color: white;
+              display: flex;
+              flex-direction: column;
+              height: 100vh;
+              justify-content: center;
+              padding: 2rem;
+              text-align: center;
+              position: relative;
+              width: 100%;
+            }
+
+            .not-found-container h1 {
+              font-size: 6rem;
+              margin: 0;
+            }
+
+            .not-found-container p {
+              font-size: 1.5rem;
+              margin: 1rem 0 2rem;
+            }
+
+            .not-found-container a {
+              background-color: white;
+              border-radius: 0.5rem;
+              color: hsl(200, 77%, 52%);
+              font-weight: bold;
+              padding: 0.75rem 1.5rem;
+              text-decoration: none;
+              transition: background-color 0.3s ease, color 0.3s ease;
+            }
+
+            .not-found-container a:hover {
+              background-color: hsl(200, 90%, 60%);
+              color: white;
+            }
+
+            .not-found-footer-waves {
+              position: absolute;
+              bottom: 0;
+              width: 100%;
+            }
+
+            .not-found-footer-waves svg {
+              fill: hsl(240, 33%, 99%);
+              width: 100%;
+            }
+          </style>
+
+          <section class="not-found-container">
+            <h1>404</h1>
+            <p>Lo sentimos, la página que buscas no existe.</p>
+            <a href="/">Volver al inicio</a>
+            <div class="not-found-footer-waves">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 320">
+                <path d="M0,256L30,229.3C60,203,120,149,180,133.3C240,117,300,139,360,170.7C420,203,480,245,540,224C600,203,660,117,720,74.7C780,32,840,32,900,53.3C960,75,1020,117,1080,160C1140,203,1200,245,1260,266.7C1320,288,1380,288,1410,288L1440,288L1440,0L1410,0C1380,0,1320,0,1260,0C1200,0,1140,0,1080,0C1020,0,960,0,900,0C840,0,780,0,720,0C660,0,600,0,540,0C480,0,420,0,360,0C300,0,240,0,180,0C120,0,60,0,30,0L0,0Z"></path>
+              </svg>
+            </div>
+          </section>
+          `
+        }
+      }
+
+      customElements.define('not-found-page', NotFoundPage)
+    </script>
+  </body>
+</html>
