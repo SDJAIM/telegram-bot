@@ -1,27 +1,36 @@
-class Table extends HTMLElement {
+import { store } from '../redux/store.js'
+import { showFormElement } from '../redux/crud-slice.js'
+
+class UserTable extends HTMLElement {
   constructor () {
     super()
     this.shadow = this.attachShadow({ mode: 'open' })
+    this.endpoint = '/api/admin/users'
+    this.unsubscribe = null
   }
 
-  static get observedAttributes () { }
-
   async connectedCallback () {
+    this.unsubscribe = store.subscribe(() => {
+      const currentState = store.getState()
+
+      if (currentState.crud.tableEndpoint === this.endpoint) {
+        this.loadData().then(() => this.render())
+      }
+    })
+
     await this.loadData()
     await this.render()
   }
 
   async loadData () {
     try {
-      const response = await fetch('/api/admin/users')
+      const response = await fetch(this.endpoint)
 
       if (!response.ok) {
         throw new Error(`Error fetching data: ${response.statusText}`)
       }
 
       this.data = await response.json()
-
-      console.log(this.data)
     } catch (error) {
       console.error('Error loading data:', error)
       this.data = []
@@ -199,9 +208,56 @@ class Table extends HTMLElement {
       const updatedAtLi = document.createElement('li')
       updatedAtLi.textContent = `Fecha de actualización: ${register.updatedAt}`
       tableRegisterBodyList.appendChild(updatedAtLi)
-    }
-    )
+    })
+
+    this.renderButtons()
+  }
+
+  renderButtons () {
+    this.shadow.querySelector('.table').addEventListener('click', async event => {
+      if (event.target.closest('.edit-button')) {
+        const element = event.target.closest('.edit-button')
+        const id = element.dataset.id
+        const endpoint = `${this.endpoint}/${id}`
+
+        try {
+          const response = await fetch(endpoint)
+
+          if (response.status === 500 || response.status === 404) {
+            throw response
+          }
+
+          const data = await response.json()
+
+          const formElement = {
+            endPoint: this.endpoint,
+            data
+          }
+
+          store.dispatch(showFormElement(formElement))
+        } catch (error) {
+          document.dispatchEvent(new CustomEvent('notice', {
+            detail: {
+              message: 'No se han podido recuperar el dato',
+              type: 'error'
+            }
+          }))
+        }
+      }
+
+      if (event.target.closest('.delete-button')) {
+        const element = event.target.closest('.delete-button')
+        const id = element.dataset.id
+
+        document.dispatchEvent(new CustomEvent('showDeleteModal', {
+          detail: {
+            endpoint: this.endpoint,
+            elementId: id
+          }
+        }))
+      }
+    })
   }
 }
 
-customElements.define('table-component', Table)
+customElements.define('users-table-component', UserTable)
