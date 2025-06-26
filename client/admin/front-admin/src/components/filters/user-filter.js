@@ -25,7 +25,7 @@ class UserFilter extends HTMLElement {
 
       .overlay {
         align-items: center;
-        background-color: hsl(0, 0%, 0%, 0.9);
+        background-color: rgba(0, 0, 0, 0.9);
         display: flex;
         height: 100vh;
         justify-content: center;
@@ -35,7 +35,7 @@ class UserFilter extends HTMLElement {
         width: 100%;
         opacity: 0;
         visibility: hidden;
-        transition: opacity 0.3s ease, visibility 0.3s ease;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         z-index: 1000;
       }
 
@@ -45,15 +45,20 @@ class UserFilter extends HTMLElement {
       }
 
       .filter-modal {
-        background-color: #1b0044;
+        background-color: #ffffff;
         padding: 2rem;
         display: flex;
         flex-direction: column;
         gap: 1.5rem;
         border-radius: 12px;
         width: 400px;
-        border: 1px solid hsl(240, 50%, 40%);
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        transform: translateY(-20px);
+        transition: transform 0.3s ease;
+      }
+
+      .overlay.active .filter-modal {
+        transform: translateY(0);
       }
 
       .filter-field {
@@ -63,24 +68,26 @@ class UserFilter extends HTMLElement {
       }
 
       .filter-field label {
-        font-weight: bold;
-        color: white;
+        font-weight: 600;
+        color: #374151;
         font-family: "Nunito Sans", sans-serif;
+        font-size: 0.95rem;
       }
 
       .filter-field input {
         padding: 0.75rem;
-        border: 1px solid hsl(240, 50%, 40%);
+        border: 1px solid #e5e7eb;
         border-radius: 6px;
-        background-color: rgba(255, 255, 255, 0.1);
-        color: white;
+        background-color: #ffffff;
+        color: #111827;
         font-family: "Nunito Sans", sans-serif;
-        transition: border-color 0.3s ease;
+        transition: all 0.2s ease;
       }
 
       .filter-field input:focus {
         outline: none;
-        border-color: hsl(271, 100%, 66%);
+        border-color: #6366f1;
+        box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
       }
 
       .filter-buttons {
@@ -96,28 +103,26 @@ class UserFilter extends HTMLElement {
         border-radius: 6px;
         cursor: pointer;
         font-family: "Nunito Sans", sans-serif;
-        font-weight: bold;
-        transition: all 0.3s ease;
+        font-weight: 600;
+        transition: all 0.2s ease;
       }
 
       .apply-button {
-        background-color: hsl(240, 50%, 40%);
+        background-color: #6366f1;
         color: white;
       }
 
       .apply-button:hover {
-        background-color: hsl(271, 100%, 66%);
+        background-color: #4f46e5;
       }
 
       .reset-button {
-        background-color: transparent;
-        color: hsl(240, 50%, 40%);
-        border: 1px solid hsl(240, 50%, 40%);
+        background-color: #f3f4f6;
+        color: #111827;
       }
 
       .reset-button:hover {
-        color: hsl(271, 100%, 66%);
-        border-color: hsl(271, 100%, 66%);
+        background-color: #e5e7eb;
       }
     </style>
 

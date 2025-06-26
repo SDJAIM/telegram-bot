@@ -19,7 +19,7 @@ class Main extends HTMLElement {
         display: grid;
         gap: 2rem;
         grid-template-columns: 2fr 4fr;
-        padding: 0 2%;
+        padding: 1rem 2%;
       }
 
       </style>

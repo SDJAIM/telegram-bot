@@ -25,13 +25,15 @@ class DeleteModal extends HTMLElement {
     this.shadow.innerHTML =
       /* html */`
     <style>
-      *{
+      * {
         box-sizing: border-box;
+        margin: 0;
+        padding: 0;
       }
 
-      .overlay{
+      .overlay {
         align-items: center;
-        background-color: hsl(0, 0%, 0%, 0.7);
+        background-color: rgba(0, 0, 0, 0.8);
         display: flex;
         height: 100vh;
         justify-content: center;
@@ -41,37 +43,84 @@ class DeleteModal extends HTMLElement {
         width: 100%;
         opacity: 0;
         visibility: hidden;
-        transition: opacity 0.3s, visibility 0.3s;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        z-index: 1000;
       }
 
-      .overlay.active{
+      .overlay.active {
         opacity: 1;
         visibility: visible;
       }
 
       .validate {
-        background-color: wheat;
-        padding: 1rem;
+        background-color: #ffffff;
+        padding: 2rem;
         display: flex;
         flex-direction: column;
         text-align: center;
-        gap: 2rem;
-        border: 2px solid;
-        border-color: hsl(0, 0%, 0%);
-        width: 25%;
+        gap: 1.5rem;
+        border-radius: 12px;
+        width: 400px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        transform: translateY(-20px);
+        transition: transform 0.3s ease;
       }
 
-      .option-buttons{
+      .overlay.active .validate {
+        transform: translateY(0);
+      }
+
+      .option-buttons {
         display: flex;
         justify-content: space-around;
         align-items: center;
+        gap: 1rem;
+      }
+
+      .option-buttons button {
+        padding: 0.75rem 1.5rem;
+        border: none;
+        border-radius: 6px;
+        cursor: pointer;
+        font-family: "Nunito Sans", sans-serif;
+        font-weight: 600;
+        transition: all 0.2s ease;
+      }
+
+      .acepted-button button {
+        background-color: #dc2626;
+        color: white;
+      }
+
+      .acepted-button button:hover {
+        background-color: #b91c1c;
+      }
+
+      .denied-button button {
+        background-color: #f3f4f6;
+        color: #111827;
+      }
+
+      .denied-button button:hover {
+        background-color: #e5e7eb;
+      }
+
+      .notice-info {
+        color: #1e293b;
+        font-family: "Nunito Sans", sans-serif;
+        font-size: 1.1rem;
+        line-height: 1.5;
+      }
+
+      .notice-info span {
+        color: inherit;
       }
 
     </style>
 
     <div class="overlay">
       <section class="validate">
-        <div calss= "notice-info">
+        <div class="notice-info">
           <span>Está seguro que quiere eliminar los datos</span>
         </div>
         <div class="option-buttons">

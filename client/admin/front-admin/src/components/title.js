@@ -14,9 +14,16 @@ class Title extends HTMLElement {
     this.shadow.innerHTML =
       /* html */`
       <style>
-      .title h1{
-        font-family:"Nunito Sans", sans-serif;
+      .title {
+        padding: 1.5rem;
+      }
+
+      .title h1 {
+        font-family: "Nunito Sans", sans-serif;
+        font-size: 1.75rem;
+        font-weight: 600;
         margin: 0;
+        line-height: 1.2;
       }
       </style>
       <div class="title">

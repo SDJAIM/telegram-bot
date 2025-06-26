@@ -15,9 +15,36 @@ class Menu extends HTMLElement {
       /* html */`
       <style>
 
-      .menu-button svg{
-        fill: hsl(0, 0%, 100%);
+      .menu {
+        padding: 1rem;
+      }
+
+      .menu-button {
+        background-color: transparent;
+        border: none;
+        cursor: pointer;
+        padding: 0.75rem;
+        border-radius: 8px;
+        transition: all 0.2s ease;
+      }
+
+      .menu-button:hover {
+        background-color: rgba(99, 102, 241, 0.1);
+      }
+
+      .menu-button:active {
+        background-color: rgba(99, 102, 241, 0.2);
+      }
+
+      .menu-button svg {
+        fill: #6366f1;
         width: 2rem;
+        height: 2rem;
+        transition: fill 0.2s ease;
+      }
+
+      .menu-button:hover svg {
+        fill: #4f46e5;
       }
 
       </style>

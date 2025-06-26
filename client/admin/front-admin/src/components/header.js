@@ -20,7 +20,7 @@ class Header extends HTMLElement {
             background-color: transparent;
             display: flex;
             justify-content: space-between;
-            padding: 2rem 2%;
+            padding: 0 1rem;
           }
 
       </style>

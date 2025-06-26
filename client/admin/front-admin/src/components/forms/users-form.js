@@ -29,98 +29,173 @@ class UserForm extends HTMLElement {
       /* html */`
       <style>
 
-        *{
-            box-sizing: border-box;
-        }
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
 
-        .form{
-            display: flex;
-            flex-direction: column;
-            gap: 1rem;
-        }
+      .form {
+        display: flex;
+        flex-direction: column;
+        gap: 1.5rem;
+        background-color: #ffffff;
+        border-radius: 8px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+      }
 
-        .form-header{
-            align-items: center;
-            background-color: hsl(0, 0%, 100%);
-            display: flex;
-            justify-content: space-between;
-            height: 2rem;
-        }
+      .form-header {
+        align-items: center;
+        background-color: #f9fafb;
+        display: flex;
+        justify-content: space-between;
+        border-bottom: 1px solid #e5e7eb;
+        border-radius: 8px 8px 0 0;
+        overflow: visible;
+        height: 3rem;
+      }
 
-        .form-header-tabs ul{
-            display: flex;
-            height: 2rem;
-            list-style: none;
-            margin: 0;
-            padding: 0;
-        }
-        .form-header-tabs ul li{
-            align-items: center;
-            background-color: hsl(240, 50%, 40%);
-            display: flex;
-            font-family: "Nunito Sans", sans-serif;
-            height: 100%;
-            padding: 0 0.5rem;
-            }
+      .form-header-tabs{
+        height: 100%;
+      }
 
-        .form-header-tabs ul li:hover{
-            cursor: pointer;
-        }
+      .form-header-tabs ul {
+        display: flex;
+        list-style: none;
+        margin: 0;
+        padding: 0;
+        height: 100%;
+      }
 
-        .form-header-tabs ul li.active{
-            background-color:hsl(271, 49.50%, 42.70%);
-        }
+      .form-header-tabs ul li {
+        align-items: center;
+        background-color: #f3f4f6;
+        display: flex;
+        font-family: "Nunito Sans", sans-serif;
+        height: 100%;
+        padding: 0 1rem;
+        color: #6b7280;
+        font-weight: 500;
+        transition: all 0.2s ease;
+        margin-right: 0.5rem;
+      }
 
-        .form-header-buttons{
-            align-items: center;
-            display: flex;
-            gap: 0.5rem;
-            padding: 0.2rem;
-        }
+      .form-header-tabs ul li:hover {
+        cursor: pointer;
+      }
 
-        .form-header-buttons > div:hover {
-            cursor: pointer;
-        }
+      .form-header-tabs ul li.active {
+        background-color: #4f46e5;
+        color: #ffffff;
 
-        .form-header-buttons svg{
-            fill: hsl(240, 50%, 40%);
-            width: 1.8rem;
-        }
+      }
 
-        .form-header-buttons > div:hover svg {
-            fill: hsl(271, 100%, 66%);
-        }
+      .form-header-buttons {
+        align-items: center;
+        display: flex;
+        gap: 0.25rem;
+      }
 
-        .form-body form{
-            display: grid;
-            gap: 1rem;
-            grid-template-columns: repeat(2, 1fr);
-        }
+      .form-header-buttons > div {
+        cursor: pointer;
+        padding: 0.5rem;
+        border-radius: 6px;
+        transition: background-color 0.2s ease;
+      }
 
-        .form-element{
-            display: flex;
-            flex-direction: column;
-            gap: 0.2rem;
-        }
+      .form-header-buttons > div:hover {
+        background-color: #f3f4f6;
+      }
 
-        .form-element-label label{
-            font-family: "Nunito Sans", sans-serif;
-            font-size: 0.9rem;
-        }
+      .form-header-buttons svg {
+        fill: #6366f1;
+        width: 1.8rem;
+        transition: fill 0.2s ease;
+      }
 
-        .form-element-input input{
-            background-color: hsl(226, 57.20%, 66.10%);
-            font-family: "Nunito Sans", sans-serif;
-            height: 1.5rem;
-            outline: none;
-            width: 100%;
-        }
+      .form-header-buttons > div:hover svg {
+        fill: #4f46e5;
+      }
 
-        .form-element-input select{
-            font-family: "Nunito Sans", sans-serif;
-            height: 2rem;
-            width: 100%;
-        }
+      .form-body{
+        padding: 1rem;
+      }
+
+      .form-body form {
+        display: grid;
+        gap: 1.5rem;
+        grid-template-columns: repeat(2, 1fr);
+        padding: 1rem 0;
+      }
+
+      .form-element {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+      }
+
+      .form-element-label label {
+        font-family: "Nunito Sans", sans-serif;
+        font-size: 0.95rem;
+        color: #374151;
+        font-weight: 500;
+      }
+
+      .form-element-input input {
+        background-color: #ffffff;
+        font-family: "Nunito Sans", sans-serif;
+        height: 2.5rem;
+        outline: none;
+        width: 100%;
+        padding: 0.75rem;
+        border: 1px solid #e5e7eb;
+        border-radius: 6px;
+        transition: all 0.2s ease;
+      }
+
+      .form-element-input input:focus {
+        border-color: #6366f1;
+        box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+      }
+
+      .form-element-input select {
+        font-family: "Nunito Sans", sans-serif;
+        height: 2.5rem;
+        width: 100%;
+        padding: 0.5rem;
+        border: 1px solid #e5e7eb;
+        border-radius: 6px;
+        background-color: #ffffff;
+        transition: all 0.2s ease;
+      }
+
+      .form-element-input select:focus {
+        border-color: #6366f1;
+        box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+      }
+
+      .tooltip {
+        position: absolute;
+        background-color: #4f46e5;
+        color: #ffffff;
+        padding: 0.25rem 0.5rem;
+        border-radius: 4px;
+        font-size: 0.875rem;
+        white-space: nowrap;
+        transform: translateY(-120%);
+        margin-bottom: 0.25rem;
+        opacity: 0;
+        transition: opacity 0.2s ease;  
+        z-index: 10;
+      }
+
+      .button {
+        position: relative;
+      }
+
+      .button:hover .tooltip {
+        opacity: 1;
+      }
 
       </style>
       <section class="form">
@@ -128,14 +203,17 @@ class UserForm extends HTMLElement {
             <div class="form-header-tabs">
                 <ul>
                     <li class="active">General</li>
+                    <li>Imágenes</li>
                 </ul>
             </div>
             <div class="form-header-buttons">
-                <div class="clean-button">
-                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><title>broom</title><path d="M19.36,2.72L20.78,4.14L15.06,9.85C16.13,11.39 16.28,13.24 15.38,14.44L9.06,8.12C10.26,7.22 12.11,7.37 13.65,8.44L19.36,2.72M5.93,17.57C3.92,15.56 2.69,13.16 2.35,10.92L7.23,8.83L14.67,16.27L12.58,21.15C10.34,20.81 7.94,19.58 5.93,17.57Z" /></svg>
+                <div class="button clean-button">
+                  <span class="tooltip">Resetear</span>
+                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><title>broom</title><path d="M19.36,2.72L20.78,4.14L15.06,9.85C16.13,11.39 16.28,13.24 15.38,14.44L9.06,8.12C10.26,7.22 12.11,7.37 13.65,8.44L19.36,2.72M5.93,17.57C3.92,15.56 2.69,13.16 2.35,10.92L7.23,8.83L14.67,16.27L12.58,21.15C10.34,20.81 7.94,19.58 5.93,17.57Z" /></svg>
                 </div>
-                <div class="save-button">
-                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><title>content-save</title><path d="M15,9H5V5H15M12,19A3,3 0 0,1 9,16A3,3 0 0,1 12,13A3,3 0 0,1 15,16A3,3 0 0,1 12,19M17,3H5C3.89,3 3,3.9 3,5V19A2,2 0 0,0 5,21H19A2,2 0 0,0 21,19V7L17,3Z" /></svg>
+                <div class="button save-button">
+                  <span class="tooltip">Guardar</span>
+                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><title>content-save</title><path d="M15,9H5V5H15M12,19A3,3 0 0,1 9,16A3,3 0 0,1 12,13A3,3 0 0,1 15,16A3,3 0 0,1 12,19M17,3H5C3.89,3 3,3.9 3,5V19A2,2 0 0,0 5,21H19A2,2 0 0,0 21,19V7L17,3Z" /></svg>
                 </div>
             </div>
         </div>
