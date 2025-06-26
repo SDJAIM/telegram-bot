@@ -15,7 +15,7 @@ class Title extends HTMLElement {
       /* html */`
       <style>
       .title h1{
-        font-family: Roboto, "Helvetica Neue", Arial;
+        font-family:"Nunito Sans", sans-serif;
         margin: 0;
       }
       </style>

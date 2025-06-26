@@ -1,5 +1,5 @@
-import { store } from '../redux/store.js'
-import { showFormElement } from '../redux/crud-slice.js'
+import { store } from '../../redux/store.js'
+import { showFormElement } from '../../redux/crud-slice.js'
 
 class UserTable extends HTMLElement {
   constructor () {
@@ -41,6 +41,12 @@ class UserTable extends HTMLElement {
     this.shadow.innerHTML =
       /* html */`
     <style>
+
+      *{
+        box-sizing: border-box;
+        font-family: "Nunito Sans", sans-serif;
+      }
+
       .table {
         display: flex;
         flex-direction: column;
@@ -73,9 +79,22 @@ class UserTable extends HTMLElement {
         display: flex;
         flex-direction: column;
         gap: 1rem;
-        margin: 1rem auto;
-        min-height: 70vh;
-        width: 90%;
+        padding: 2rem;
+        min-height: 75vh;
+        max-height: 75vh;
+        overflow-y: scroll;
+        width: 100%;
+      }
+
+      .table-body::-webkit-scrollbar {
+        width: 0.5rem;
+        background-color: hsl(0, 0%, 3%);
+      }
+
+      .table-body::-webkit-scrollbar-thumb {
+        background-color: hsl(0, 0%, 20%);
+        border-radius: 0.25rem;
+        border: 0.1rem solid hsl(0, 0%, 3%);
       }
 
       .table-register-header {
@@ -134,9 +153,19 @@ class UserTable extends HTMLElement {
       }
 
       .table-footer-pagination-button {
-        color: hsl(0, 1.50%, 60.60%); 
         display: flex;
+        align-items: center;
         cursor: pointer;
+      }
+
+      .table-footer-pagination-button svg {
+        fill: hsl(0, 1.50%, 60.60%);
+        width: 1.5rem;
+        height: 1.5rem;
+      }
+
+      .table-footer-pagination-button:hover svg {
+        fill: hsl(271, 100%, 66%);
       }
     </style>
       <section class="table">
@@ -153,7 +182,18 @@ class UserTable extends HTMLElement {
             <span>${this.data.meta.total} registro en total, mostrando ${this.data.meta.size} por página</span>
           </div>
           <div class="table-footer-pagination">
-            <div class="table-footer-pagination-button"><<</div>
+            <div class="table-footer-pagination-button">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><title>chevron-double-left</title><path d="M18.41,7.41L17,6L11,12L17,18L18.41,16.59L13.83,12L18.41,7.41M12.41,7.41L11,6L5,12L11,18L12.41,16.59L7.83,12L12.41,7.41Z" /></svg>
+            </div>
+            <div class="table-footer-pagination-button">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><title>chevron-left</title><path d="M15.41,16.58L10.83,12L15.41,7.41L14,6L8,12L14,18L15.41,16.58Z" /></svg>
+            </div>
+            <div class="table-footer-pagination-button">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><title>chevron-right</title><path d="M8.59,16.58L13.17,12L8.59,7.41L10,6L16,12L10,18L8.59,16.58Z" /></svg>
+            </div>
+            <div class="table-footer-pagination-button">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><title>chevron-double-right</title><path d="M5.59,7.41L7,6L13,12L7,18L5.59,16.59L10.17,12L5.59,7.41M11.59,7.41L13,6L19,12L13,18L11.59,16.59L16.17,12L11.59,7.41Z" /></svg>
+            </div>
           </div>
         </div>
     </section>
@@ -215,6 +255,10 @@ class UserTable extends HTMLElement {
 
   renderButtons () {
     this.shadow.querySelector('.table').addEventListener('click', async event => {
+      if (event.target.closest('.filter-button')) {
+        document.dispatchEvent(new CustomEvent('showFilterModal'))
+      }
+
       if (event.target.closest('.edit-button')) {
         const element = event.target.closest('.edit-button')
         const id = element.dataset.id

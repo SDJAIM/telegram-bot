@@ -1,6 +1,6 @@
 import isEqual from 'lodash-es/isEqual'
-import { store } from '../redux/store.js'
-import { refreshTable } from '../redux/crud-slice.js'
+import { store } from '../../redux/store.js'
+import { refreshTable } from '../../redux/crud-slice.js'
 
 class UserForm extends HTMLElement {
   constructor () {
@@ -58,7 +58,7 @@ class UserForm extends HTMLElement {
             align-items: center;
             background-color: hsl(240, 50%, 40%);
             display: flex;
-            font-family: Roboto, "Helvetica Neue", Arial;
+            font-family: "Nunito Sans", sans-serif;
             height: 100%;
             padding: 0 0.5rem;
             }
@@ -104,20 +104,20 @@ class UserForm extends HTMLElement {
         }
 
         .form-element-label label{
-            font-family: Roboto, "Helvetica Neue", Arial;
+            font-family: "Nunito Sans", sans-serif;
             font-size: 0.9rem;
         }
 
         .form-element-input input{
             background-color: hsl(226, 57.20%, 66.10%);
-            font-family: Roboto, "Helvetica Neue", Arial;
+            font-family: "Nunito Sans", sans-serif;
             height: 1.5rem;
             outline: none;
             width: 100%;
         }
 
         .form-element-input select{
-            font-family: Roboto, "Helvetica Neue", Arial;
+            font-family: "Nunito Sans", sans-serif;
             height: 2rem;
             width: 100%;
         }
@@ -233,6 +233,26 @@ class UserForm extends HTMLElement {
     form.reset()
     this.shadow.querySelector('[name="id"]').value = ''
     this.formElementData = null
+    this.shadow.querySelectorAll('.error-message').forEach(el => el.remove())
+    this.shadow.querySelectorAll('.form-element-input input').forEach(input => {
+      input.classList.remove('error')
+    })
+  }
+
+  showError (input, message) {
+    const errorElement = document.createElement('div')
+    errorElement.className = 'error-message'
+    errorElement.textContent = message
+    errorElement.style.color = '#ff4444'
+    errorElement.style.fontSize = '0.8rem'
+    errorElement.style.marginTop = '0.2rem'
+    input.classList.add('error')
+    input.parentElement.appendChild(errorElement)
+  }
+
+  validateEmail (email) {
+    const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+    return re.test(String(email).toLowerCase())
   }
 }
 

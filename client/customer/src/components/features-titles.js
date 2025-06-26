@@ -33,7 +33,7 @@ class FeaturesTitles extends HTMLElement {
       }
 
       h1, h2, h3, h4, h5, h6, p, a, span, li, label, input, button{
-        font-family: "Nunito Sans", serif;
+        font-family: "Nunito Sans", sans-serif;
         font-optical-sizing: auto;
       }
 
