@@ -15,9 +15,18 @@ class UserForm extends HTMLElement {
     this.unsubscribe = store.subscribe(() => {
       const currentState = store.getState()
 
-      if (currentState.crud.formElement && currentState.crud.formElement.endPoint === this.endpoint && !isEqual(this.formElementData, currentState.crud.formElement.data)) {
-        this.formElementData = currentState.crud.formElement.data
+      const formElement = currentState.crud.formElement
+      if (
+        formElement.data &&
+        formElement.endPoint === this.endpoint &&
+        !isEqual(this.formElementData, formElement.data)
+      ) {
+        this.formElementData = formElement.data
         this.showElement(this.formElementData)
+      }
+
+      if (!currentState.crud.formElement.data && currentState.crud.formElement.endPoint === this.endpoint) {
+        this.resetForm()
       }
     })
 
@@ -87,7 +96,44 @@ class UserForm extends HTMLElement {
       .form-header-tabs ul li.active {
         background-color: #4f46e5;
         color: #ffffff;
+      }
 
+      .tabs {
+        display: flex;
+        height: 100%;
+      }
+
+      .tab {
+        display: flex;
+        align-items: center;
+        padding: 0 1rem;
+        font-family: "Nunito Sans", sans-serif;
+        color: #6b7280;
+        font-weight: 500;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        margin-right: 0.5rem;
+        background-color: #f3f4f6;
+      }
+
+      .tab:hover {
+        background-color: #e5e7eb;
+      }
+
+      .tab.active {
+        background-color: #4f46e5;
+        color: #ffffff;
+      }
+
+      .tab-content {
+        display: none;
+      }
+
+      .tab-content.active {
+        display: grid;
+        gap: 1.5rem;
+        grid-template-columns: repeat(2, 1fr);
+        padding: 1rem 0;
       }
 
       .form-header-buttons {
@@ -121,13 +167,6 @@ class UserForm extends HTMLElement {
         padding: 1rem;
       }
 
-      .form-body form {
-        display: grid;
-        gap: 1.5rem;
-        grid-template-columns: repeat(2, 1fr);
-        padding: 1rem 0;
-      }
-
       .form-element {
         display: flex;
         flex-direction: column;
@@ -151,6 +190,16 @@ class UserForm extends HTMLElement {
         border: 1px solid #e5e7eb;
         border-radius: 6px;
         transition: all 0.2s ease;
+      }
+
+      .form-element-input input.error {
+        border-color: #dc2626;
+      }
+
+      .error-message {
+        color: #dc2626;
+        font-size: 0.875rem;
+        margin-top: 0.25rem;
       }
 
       .form-element-input input:focus {
@@ -200,11 +249,13 @@ class UserForm extends HTMLElement {
       </style>
       <section class="form">
         <div class="form-header">
-            <div class="form-header-tabs">
-                <ul>
-                    <li class="active">General</li>
-                    <li>Imágenes</li>
-                </ul>
+            <div class="tabs">
+                <div class="tab active" data-tab="general">
+                  <span>General</span>
+                </div>
+                <div class="tab" data-tab="images">
+                  <span>Imágenes</span>
+                </div>
             </div>
             <div class="form-header-buttons">
                 <div class="button clean-button">
@@ -218,30 +269,62 @@ class UserForm extends HTMLElement {
             </div>
         </div>
         <div class="form-body">
-            <form>
-                <input type="hidden" name="id">
-                <div class="form-element">
-                    <div class="form-element-label">
-                        <label for="nombre">Nombre</label>
+          <div class="validation-errors">
+            <ul>
+            </ul>
+          </div>
+          <form>
+            <div class="tab-content active" data-tab="general">
+              <input type="hidden" name="id">
+              <div class="form-element">
+                <div class="form-element-label">
+                  <label for="nombre">Nombre</label>
                 </div>
-                    <div class="form-element-input">
-                        <input type="text" id="nombre" name="name">
-                    </div>
+                <div class="form-element-input">
+                  <input type="text" id="nombre" name="name">
                 </div>
-                <div class="form-element">
-                    <div class="form-element-label">
-                        <label for="email">Email</label>
-                    </div>
-                    <div class="form-element-input">
-                        <input type="email" id="email" name="email">
-                    </div>
+              </div>
+              <div class="form-element">
+                <div class="form-element-label">
+                  <label for="email">Email</label>
                 </div>
-            </form>
+                <div class="form-element-input">
+                  <input type="email" id="email" name="email">
+                </div>
+              </div>
+            </div>
+            <div class="tab-content" data-tab="images">
+              <div class="form-element">
+                <div class="form-element-label">
+                  <label for="image">Imagen</label>
+                </div>
+                <div class="form-element-input">
+                  <input type="text" id="image" name="image">
+                </div>
+              </div>
+            </div>
+          </form>
         </div>
     </section>
   `
 
     this.renderButtons()
+    this.setupTabs()
+  }
+
+  setupTabs () {
+    const tabContainer = this.shadow.querySelector('.tabs')
+
+    tabContainer.addEventListener('click', (event) => {
+      const clickedTab = event.target.closest('.tab')
+      if (!clickedTab) return
+
+      this.shadow.querySelector('.tab.active').classList.remove('active')
+      clickedTab.classList.add('active')
+
+      this.shadow.querySelector('.tab-content.active').classList.remove('active')
+      this.shadow.querySelector(`.tab-content[data-tab='${clickedTab.dataset.tab}']`).classList.add('active')
+    })
   }
 
   renderButtons () {
@@ -261,6 +344,21 @@ class UserForm extends HTMLElement {
       const method = id ? 'PUT' : 'POST'
       delete formDataJson.id
 
+      const errors = {}
+      if (!formDataJson.name) {
+        errors.name = 'El nombre es requerido'
+      }
+      if (!formDataJson.email) {
+        errors.email = 'El email es requerido'
+      } else if (!this.validateEmail(formDataJson.email)) {
+        errors.email = 'Ingrese un email válido'
+      }
+
+      if (Object.keys(errors).length > 0) {
+        this.showValidationErrors(errors)
+        return
+      }
+
       try {
         const response = await fetch(endpoint, {
           method,
@@ -271,7 +369,7 @@ class UserForm extends HTMLElement {
         })
 
         if (!response.ok) {
-          throw new Error(`Error al guardar los datos: ${response.statusText}`)
+          throw response
         }
 
         store.dispatch(refreshTable(this.endpoint))
@@ -284,12 +382,19 @@ class UserForm extends HTMLElement {
           }
         }))
       } catch (error) {
-        document.dispatchEvent(new CustomEvent('notice', {
-          detail: {
-            message: 'No se han podido guardar los datos',
-            type: 'error'
-          }
-        }))
+        if (error.status === 500) {
+          document.dispatchEvent(new CustomEvent('notice', {
+            detail: {
+              message: 'No se han podido guardar los datos',
+              type: 'error'
+            }
+          }))
+        }
+
+        if (error.status === 422) {
+          const data = await error.json()
+          this.showValidationErrors(data.message)
+        }
       }
     })
 
@@ -317,15 +422,22 @@ class UserForm extends HTMLElement {
     })
   }
 
-  showError (input, message) {
-    const errorElement = document.createElement('div')
-    errorElement.className = 'error-message'
-    errorElement.textContent = message
-    errorElement.style.color = '#ff4444'
-    errorElement.style.fontSize = '0.8rem'
-    errorElement.style.marginTop = '0.2rem'
-    input.classList.add('error')
-    input.parentElement.appendChild(errorElement)
+  showValidationErrors (messages) {
+    this.shadow.querySelectorAll('.error-message').forEach(el => el.remove())
+    this.shadow.querySelectorAll('.form-element-input input').forEach(input => {
+      input.classList.remove('error')
+    })
+
+    Object.entries(messages).forEach(([field, message]) => {
+      const input = this.shadow.querySelector(`[name="${field}"]`)
+      if (input) {
+        input.classList.add('error')
+        const errorMessage = document.createElement('div')
+        errorMessage.className = 'error-message'
+        errorMessage.textContent = message
+        input.parentElement.appendChild(errorMessage)
+      }
+    })
   }
 
   validateEmail (email) {
