@@ -1,10 +1,13 @@
+import { store } from '../../redux/store.js'
+import { setFilterQuery } from '../../redux/crud-slice.js'
+
 class UserFilter extends HTMLElement {
   constructor () {
     super()
     this.shadow = this.attachShadow({ mode: 'open' })
-    this.endpoint = ''
+    this.endpoint = '/api/admin/users'
     this.tableEndpoint = ''
-    document.addEventListener('showFilterModal', this.showFilterModal.bind(this))
+    document.addEventListener('showUserFilterModal', this.showFilterModal.bind(this))
   }
 
   connectedCallback () {
@@ -130,12 +133,12 @@ class UserFilter extends HTMLElement {
       <div class="filter-modal">
         <form>
           <div class="filter-field">
-            <label for="nombre">Nombre:</label>
-            <input type="text" id="nombre">
+            <label for="name">Nombre:</label>
+            <input type="text" id="name" name="name">
           </div>
           <div class="filter-field">
             <label for="email">Email:</label>
-            <input type="email" id="email">
+            <input type="email" id="email" name="email">
           </div>
         </form>
         <div class="filter-buttons">
@@ -156,16 +159,22 @@ class UserFilter extends HTMLElement {
     applyButton.addEventListener('click', (e) => {
       e.preventDefault()
 
-      const filters = {
-        nombre: this.shadow.querySelector('#nombre').value,
-        email: this.shadow.querySelector('#email').value,
-        fechaCreacion: this.shadow.querySelector('#fecha-creacion')?.value || '',
-        fechaActualizacion: this.shadow.querySelector('#fecha-actualizacion')?.value || ''
+      const form = this.shadow.querySelector('form')
+      const formData = new FormData(form)
+      const formDataJson = {}
+
+      for (const [key, value] of formData.entries()) {
+        formDataJson[key] = value !== '' ? value : null
       }
 
-      document.dispatchEvent(new CustomEvent('applyUserFilters', {
-        detail: { filters }
-      }))
+      const query = Object.entries(formDataJson).map(([key, value]) => `${key}=${value}`).join('&')
+
+      const filterQuery = {
+        endPoint: this.endpoint,
+        query
+      }
+
+      store.dispatch(setFilterQuery(filterQuery))
 
       overlay.classList.remove('active')
     })
@@ -176,8 +185,22 @@ class UserFilter extends HTMLElement {
       const form = this.shadow.querySelector('form')
       form.reset()
 
-      // Dispatch event to notify filters have been reset
-      document.dispatchEvent(new CustomEvent('resetUserFilters'))
+      const formData = new FormData(form)
+      const formDataJson = {}
+
+      for (const [key, value] of formData.entries()) {
+        formDataJson[key] = value !== '' ? value : null
+      }
+      const query = Object.entries(formDataJson).map(([key, value]) => `${key}=${value}`).join('&')
+
+      const filterQuery = {
+        endPoint: this.endpoint,
+        query
+      }
+
+      store.dispatch(setFilterQuery(filterQuery))
+
+      overlay.classList.remove('active')
     })
 
     // Close modal when clicking outside
