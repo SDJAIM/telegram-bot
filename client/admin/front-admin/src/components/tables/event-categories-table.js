@@ -1,11 +1,11 @@
 import { store } from '../../redux/store.js'
 import { showFormElement } from '../../redux/crud-slice.js'
 
-class UserTable extends HTMLElement {
+class EventCategoryTable extends HTMLElement {
   constructor () {
     super()
     this.shadow = this.attachShadow({ mode: 'open' })
-    this.endpoint = '/api/admin/users'
+    this.endpoint = '/api/admin/event-categories'
     this.filterQuery = null
     this.unsubscribe = null
   }
@@ -346,10 +346,6 @@ class UserTable extends HTMLElement {
       tableRegisterBodyList.appendChild(nameLi)
       nameLi.textContent = `Nombre: ${register.name}`
 
-      const emailLi = document.createElement('li')
-      tableRegisterBodyList.appendChild(emailLi)
-      emailLi.textContent = `Email: ${register.email}`
-
       const createdAtLi = document.createElement('li')
       createdAtLi.textContent = `Fecha de creación: ${register.createdAt}`
       tableRegisterBodyList.appendChild(createdAtLi)
@@ -365,7 +361,11 @@ class UserTable extends HTMLElement {
   renderButtons () {
     this.shadow.querySelector('.table').addEventListener('click', async event => {
       if (event.target.closest('.filter-button')) {
-        document.dispatchEvent(new CustomEvent('showUserFilterModal'))
+        document.dispatchEvent(new CustomEvent('showUserFilterModal', {
+          detail: {
+            endpoint: this.endpoint
+          }
+        }))
       }
 
       if (event.target.closest('.edit-button')) {
@@ -423,4 +423,4 @@ class UserTable extends HTMLElement {
   }
 }
 
-customElements.define('users-table-component', UserTable)
+customElements.define('event-categories-table-component', EventCategoryTable)

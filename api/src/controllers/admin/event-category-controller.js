@@ -1,15 +1,15 @@
-const moment = require('moment')
-const mongooseDb = require('../../models/mongoose')
-const Faq = mongooseDb.Faq
+const sequelizeDb = require('../../models/sequelize')
+const EventCategory = sequelizeDb.EventCategory
+const Op = sequelizeDb.Sequelize.Op
 
 exports.create = async (req, res, next) => {
   try {
-    let data = await Faq.create(req.body)
-    data = data.toObject()
-    data.id = data._id
-
+    const data = await EventCategory.create(req.body)
     res.status(200).send(data)
   } catch (err) {
+    if (err.name === 'SequelizeValidationError') {
+      err.statusCode = 422
+    }
     next(err)
   }
 }
@@ -20,39 +20,33 @@ exports.findAll = async (req, res, next) => {
     const limit = parseInt(req.query.size) || 10
     const offset = (page - 1) * limit
     const whereStatement = {}
-    whereStatement.deletedAt = { $exists: false }
 
     for (const key in req.query) {
       if (req.query[key] !== '' && req.query[key] !== 'null' && key !== 'page' && key !== 'size') {
-        whereStatement[key] = { $regex: req.query[key], $options: 'i' }
+        whereStatement[key] = { [Op.substring]: req.query[key] }
       }
     }
 
-    const result = await Faq.find(whereStatement)
-      .skip(offset)
-      .limit(limit)
-      .sort({ createdAt: -1 })
-      .lean()
-      .exec()
+    const condition = Object.keys(whereStatement).length > 0
+      ? { [Op.and]: [whereStatement] }
+      : {}
 
-    const count = await Faq.countDocuments(whereStatement)
+    const result = await EventCategory.findAndCountAll({
+      where: condition,
+      attributes: ['id', 'name', 'createdAt', 'updatedAt'],
+      limit,
+      offset,
+      order: [['createdAt', 'DESC']]
+    })
 
-    const response = {
-      rows: result.map(doc => ({
-        ...doc,
-        id: doc._id,
-        _id: undefined,
-        createdAt: moment(doc.createdAt).format('YYYY-MM-DD HH:mm'),
-        updatedAt: moment(doc.updatedAt).format('YYYY-MM-DD HH:mm')
-      })),
-      meta: {
-        total: count,
-        pages: Math.ceil(count / limit),
-        currentPage: page
-      }
+    result.meta = {
+      total: result.count,
+      pages: Math.ceil(result.count / limit),
+      currentPage: page,
+      size: limit
     }
 
-    res.status(200).send(response)
+    res.status(200).send(result)
   } catch (err) {
     next(err)
   }
@@ -61,7 +55,7 @@ exports.findAll = async (req, res, next) => {
 exports.findOne = async (req, res, next) => {
   try {
     const id = req.params.id
-    const data = await Faq.findById(id).lean().exec()
+    const data = await EventCategory.findByPk(id)
 
     if (!data) {
       const err = new Error()
@@ -70,7 +64,6 @@ exports.findOne = async (req, res, next) => {
       throw err
     }
 
-    data.id = data._id
     res.status(200).send(data)
   } catch (err) {
     next(err)
@@ -80,9 +73,9 @@ exports.findOne = async (req, res, next) => {
 exports.update = async (req, res, next) => {
   try {
     const id = req.params.id
-    const data = await Faq.findByIdAndUpdate(id, req.body, { new: true }).lean().exec()
+    const [numberRowsAffected] = await EventCategory.update(req.body, { where: { id } })
 
-    if (!data) {
+    if (numberRowsAffected !== 1) {
       const err = new Error()
       err.message = `No se puede actualizar el elemento con la id=${id}. Tal vez no se ha encontrado.`
       err.statusCode = 404
@@ -93,6 +86,10 @@ exports.update = async (req, res, next) => {
       message: 'El elemento ha sido actualizado correctamente.'
     })
   } catch (err) {
+    if (err.name === 'SequelizeValidationError') {
+      err.statusCode = 422
+    }
+
     next(err)
   }
 }
@@ -100,9 +97,9 @@ exports.update = async (req, res, next) => {
 exports.delete = async (req, res, next) => {
   try {
     const id = req.params.id
-    const data = await Faq.findByIdAndUpdate(id, { deletedAt: new Date() })
+    const numberRowsAffected = await EventCategory.destroy({ where: { id } })
 
-    if (!data) {
+    if (numberRowsAffected !== 1) {
       const err = new Error()
       err.message = `No se puede actualizar el elemento con la id=${id}. Tal vez no se ha encontrado.`
       err.statusCode = 404

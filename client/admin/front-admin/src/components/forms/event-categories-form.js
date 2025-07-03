@@ -2,11 +2,11 @@ import isEqual from 'lodash-es/isEqual'
 import { store } from '../../redux/store.js'
 import { refreshTable } from '../../redux/crud-slice.js'
 
-class UserForm extends HTMLElement {
+class EventCategoryForm extends HTMLElement {
   constructor () {
     super()
     this.shadow = this.attachShadow({ mode: 'open' })
-    this.endpoint = '/api/admin/users'
+    this.endpoint = '/api/admin/event-categories'
     this.unsubscribe = null
     this.formElementData = null
   }
@@ -37,7 +37,6 @@ class UserForm extends HTMLElement {
     this.shadow.innerHTML =
       /* html */`
       <style>
-
       * {
         box-sizing: border-box;
         margin: 0;
@@ -163,6 +162,28 @@ class UserForm extends HTMLElement {
         fill: #4f46e5;
       }
 
+      .validation-errors {
+        background-color: #fef2f2;
+        border: 1px solid #fecaca;
+        border-radius: 6px;
+        color: #b91c1c;
+        font-family: "Nunito Sans", sans-serif;
+        font-size: 0.875rem;
+        padding: 0.75rem;
+        margin-bottom: 1rem;
+        display: none;
+      }
+
+      .validation-errors.active {
+        display: block;
+      }
+
+      .validation-errors ul {
+        list-style: none;
+        margin: 0;
+        padding: 0;
+      }
+
       .form-body{
         padding: 1rem;
       }
@@ -223,6 +244,10 @@ class UserForm extends HTMLElement {
         box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
       }
 
+      .form-element-input .error{
+        border-color: #dc2626;
+      }
+
       .tooltip {
         position: absolute;
         background-color: #4f46e5;
@@ -253,9 +278,6 @@ class UserForm extends HTMLElement {
                 <div class="tab active" data-tab="general">
                   <span>General</span>
                 </div>
-                <div class="tab" data-tab="images">
-                  <span>Imágenes</span>
-                </div>
             </div>
             <div class="form-header-buttons">
                 <div class="button clean-button">
@@ -270,8 +292,10 @@ class UserForm extends HTMLElement {
         </div>
         <div class="form-body">
           <div class="validation-errors">
-            <ul>
-            </ul>
+            <div class="close-validation-errors">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><title>close-circle-outline</title><path d="M12,20C7.59,20 4,16.41 4,12C4,7.59 7.59,4 12,4C16.41,4 20,7.59 20,12C20,16.41 16.41,20 12,20M12,2C6.47,2 2,6.47 2,12C2,17.53 6.47,22 12,22C17.53,22 22,17.53 22,12C22,6.47 17.53,2 12,2M14.59,8L12,10.59L9.41,8L8,9.41L10.59,12L8,14.59L9.41,16L12,13.41L14.59,16L16,14.59L13.41,12L16,9.41L14.59,8Z" /></svg>
+            </div>
+            <ul></ul>
           </div>
           <form>
             <div class="tab-content active" data-tab="general">
@@ -284,24 +308,6 @@ class UserForm extends HTMLElement {
                   <input type="text" id="nombre" name="name">
                 </div>
               </div>
-              <div class="form-element">
-                <div class="form-element-label">
-                  <label for="email">Email</label>
-                </div>
-                <div class="form-element-input">
-                  <input type="email" id="email" name="email">
-                </div>
-              </div>
-            </div>
-            <div class="tab-content" data-tab="images">
-              <div class="form-element">
-                <div class="form-element-label">
-                  <label for="image">Imagen</label>
-                </div>
-                <div class="form-element-input">
-                  <input type="text" id="image" name="image">
-                </div>
-              </div>
             </div>
           </form>
         </div>
@@ -309,97 +315,86 @@ class UserForm extends HTMLElement {
   `
 
     this.renderButtons()
-    this.setupTabs()
-  }
-
-  setupTabs () {
-    const tabContainer = this.shadow.querySelector('.tabs')
-
-    tabContainer.addEventListener('click', (event) => {
-      const clickedTab = event.target.closest('.tab')
-      if (!clickedTab) return
-
-      this.shadow.querySelector('.tab.active').classList.remove('active')
-      clickedTab.classList.add('active')
-
-      this.shadow.querySelector('.tab-content.active').classList.remove('active')
-      this.shadow.querySelector(`.tab-content[data-tab='${clickedTab.dataset.tab}']`).classList.add('active')
-    })
   }
 
   renderButtons () {
-    this.shadow.querySelector('.save-button').addEventListener('click', async event => {
-      event.preventDefault()
-
-      const form = this.shadow.querySelector('form')
-      const formData = new FormData(form)
-      const formDataJson = {}
-
-      for (const [key, value] of formData.entries()) {
-        formDataJson[key] = value
-      }
-
-      const id = this.shadow.querySelector('[name="id"]').value
-      const endpoint = id ? `${this.endpoint}/${id}` : this.endpoint
-      const method = id ? 'PUT' : 'POST'
-      delete formDataJson.id
-
-      const errors = {}
-      if (!formDataJson.name) {
-        errors.name = 'El nombre es requerido'
-      }
-      if (!formDataJson.email) {
-        errors.email = 'El email es requerido'
-      } else if (!this.validateEmail(formDataJson.email)) {
-        errors.email = 'Ingrese un email válido'
-      }
-
-      if (Object.keys(errors).length > 0) {
-        this.showValidationErrors(errors)
-        return
-      }
-
-      try {
-        const response = await fetch(endpoint, {
-          method,
-          headers: {
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify(formDataJson)
-        })
-
-        if (!response.ok) {
-          throw response
-        }
-
-        store.dispatch(refreshTable(this.endpoint))
-        this.resetForm()
-
-        document.dispatchEvent(new CustomEvent('notice', {
-          detail: {
-            message: 'Datos guardados correctamente',
-            type: 'success'
-          }
-        }))
-      } catch (error) {
-        if (error.status === 500) {
-          document.dispatchEvent(new CustomEvent('notice', {
-            detail: {
-              message: 'No se han podido guardar los datos',
-              type: 'error'
-            }
-          }))
-        }
-
-        if (error.status === 422) {
-          const data = await error.json()
-          this.showValidationErrors(data.message)
-        }
+    document.addEventListener('keydown', function (event) {
+      if (event.key === 'Enter') {
+        event.preventDefault()
       }
     })
 
-    this.shadow.querySelector('.clean-button').addEventListener('click', async event => {
-      this.resetForm()
+    this.shadow.querySelector('.form').addEventListener('click', async event => {
+      event.preventDefault()
+
+      if (event.target.closest('.save-button')) {
+        const form = this.shadow.querySelector('form')
+        const formData = new FormData(form)
+        const formDataJson = {}
+
+        for (const [key, value] of formData.entries()) {
+          formDataJson[key] = value
+        }
+
+        const id = this.shadow.querySelector('[name="id"]').value
+        const endpoint = id ? `${this.endpoint}/${id}` : this.endpoint
+        const method = id ? 'PUT' : 'POST'
+        delete formDataJson.id
+
+        try {
+          const response = await fetch(endpoint, {
+            method,
+            headers: {
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(formDataJson)
+          })
+
+          if (!response.ok) {
+            throw response
+          }
+
+          store.dispatch(refreshTable(this.endpoint))
+          this.resetForm()
+
+          document.dispatchEvent(new CustomEvent('notice', {
+            detail: {
+              message: 'Datos guardados correctamente',
+              type: 'success'
+            }
+          }))
+        } catch (error) {
+          if (error.status === 500) {
+            document.dispatchEvent(new CustomEvent('notice', {
+              detail: {
+                message: 'No se han podido guardar los datos',
+                type: 'error'
+              }
+            }))
+          }
+
+          if (error.status === 422) {
+            const data = await error.json()
+            this.showValidationErrors(data.message)
+          }
+        }
+      }
+
+      if (event.target.closest('.clean-button')) {
+        this.resetForm()
+      }
+
+      if (event.target.closest('.close-validation-errors')) {
+        this.closeValidationErrors()
+      }
+
+      if (event.target.closest('.tab')) {
+        this.shadow.querySelector('.tab.active').classList.remove('active')
+        clickedTab.classList.add('active')
+
+        this.shadow.querySelector('.tab-content.active').classList.remove('active')
+        this.shadow.querySelector(`.tab-content[data-tab='${event.target.closest('.tab').dataset.tab}']`).classList.add('active')
+      }
     })
   }
 
@@ -422,28 +417,29 @@ class UserForm extends HTMLElement {
     })
   }
 
-  showValidationErrors (messages) {
-    this.shadow.querySelectorAll('.error-message').forEach(el => el.remove())
+  showValidationErrors (errors) {
+    const validationErrorsContainer = this.shadow.querySelector('.validation-errors')
+    validationErrorsContainer.classList.add('active')
+
+    const validationErrorsContainerList = this.shadow.querySelector('.validation-errors ul')
+    validationErrorsContainerList.innerHTML = ''
     this.shadow.querySelectorAll('.form-element-input input').forEach(input => {
       input.classList.remove('error')
     })
 
-    Object.entries(messages).forEach(([field, message]) => {
-      const input = this.shadow.querySelector(`[name="${field}"]`)
-      if (input) {
-        input.classList.add('error')
-        const errorMessage = document.createElement('div')
-        errorMessage.className = 'error-message'
-        errorMessage.textContent = message
-        input.parentElement.appendChild(errorMessage)
-      }
+    errors.forEach(error => {
+      const li = document.createElement('li')
+      li.textContent = error.message
+      validationErrorsContainer.appendChild(li)
+      this.shadow.querySelector(`[name="${error.path}"]`).classList.add('error')
     })
   }
 
-  validateEmail (email) {
-    const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
-    return re.test(String(email).toLowerCase())
+  closeValidationErrors () {
+    const validationErrorsContainer = this.shadow.querySelector('.validation-errors')
+    validationErrorsContainer.classList.remove('active')
+    validationErrorsContainer.querySelector('ul').innerHTML = ''
   }
 }
 
-customElements.define('users-form-component', UserForm)
+customElements.define('event-categories-form-component', EventCategoryForm)

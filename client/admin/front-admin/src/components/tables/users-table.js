@@ -365,7 +365,11 @@ class UserTable extends HTMLElement {
   renderButtons () {
     this.shadow.querySelector('.table').addEventListener('click', async event => {
       if (event.target.closest('.filter-button')) {
-        document.dispatchEvent(new CustomEvent('showUserFilterModal'))
+        document.dispatchEvent(new CustomEvent('showFilterModal', {
+          detail: {
+            endpoint: this.endpoint
+          }
+        }))
       }
 
       if (event.target.closest('.edit-button')) {

@@ -1,5 +1,5 @@
 module.exports = function (sequelize, DataTypes) {
-  const Model = sequelize.define('',
+  const Model = sequelize.define('EventCategory',
     {
       id: {
         type: DataTypes.INTEGER,
@@ -9,24 +9,15 @@ module.exports = function (sequelize, DataTypes) {
       },
       name: {
         type: DataTypes.STRING,
-        allowNull: false
-      },
-      email: {
-        type: DataTypes.STRING,
         allowNull: false,
-        unique: true
-      },
-      telephone: {
-        type: DataTypes.STRING,
-        allowNull: false
-      },
-      prefix: {
-        type: DataTypes.STRING,
-        allowNull: false
-      },
-      birthdate: {
-        type: DataTypes.DATE,
-        allowNull: false
+        validate: {
+          notNull: {
+            msg: 'Por favor, rellena el campo "Nombre".'
+          },
+          notEmpty: {
+            msg: 'Por favor, rellena el campo "Nombre".'
+          }
+        }
       },
       createdAt: {
         type: DataTypes.DATE,
@@ -46,7 +37,7 @@ module.exports = function (sequelize, DataTypes) {
       }
     }, {
       sequelize,
-      tableName: 's',
+      tableName: 'event_categories',
       timestamps: true,
       paranoid: true,
       indexes: [
