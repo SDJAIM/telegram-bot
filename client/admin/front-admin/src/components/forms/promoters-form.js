@@ -2,11 +2,11 @@ import isEqual from 'lodash-es/isEqual'
 import { store } from '../../redux/store.js'
 import { refreshTable } from '../../redux/crud-slice.js'
 
-class EventCategoryForm extends HTMLElement {
+class PromotersForm extends HTMLElement {
   constructor () {
     super()
     this.shadow = this.attachShadow({ mode: 'open' })
-    this.endpoint = '/api/admin/event-categories'
+    this.endpoint = '/api/admin/promoters'
     this.unsubscribe = null
     this.formElementData = null
   }
@@ -271,6 +271,18 @@ class EventCategoryForm extends HTMLElement {
         opacity: 1;
       }
 
+      .close-validation-errors svg {
+        width: 1.8rem;
+        height: 1.8rem;
+        fill: #6b7280;
+        cursor: pointer;
+        transition: fill 0.2s ease;
+      }
+
+      .close-validation-errors:hover svg {
+        fill: #4f46e5;
+      }
+
       </style>
       <section class="form">
         <div class="form-header">
@@ -293,7 +305,7 @@ class EventCategoryForm extends HTMLElement {
         <div class="form-body">
           <div class="validation-errors">
             <div class="close-validation-errors">
-              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="1.8rem"><title>close-circle-outline</title><path d="M12,20C7.59,20 4,16.41 4,12C4,7.59 7.59,4 12,4C16.41,4 20,7.59 20,12C20,16.41 16.41,20 12,20M12,2C6.47,2 2,6.47 2,12C2,17.53 6.47,22 12,22C17.53,22 22,17.53 22,12C22,6.47 17.53,2 12,2M14.59,8L12,10.59L9.41,8L8,9.41L10.59,12L8,14.59L9.41,16L12,13.41L14.59,16L16,14.59L13.41,12L16,9.41L14.59,8Z" /></svg>
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><title>close-circle-outline</title><path d="M12,20C7.59,20 4,16.41 4,12C4,7.59 7.59,4 12,4C16.41,4 20,7.59 20,12C20,16.41 16.41,20 12,20M12,2C6.47,2 2,6.47 2,12C2,17.53 6.47,22 12,22C17.53,22 22,17.53 22,12C22,6.47 17.53,2 12,2M14.59,8L12,10.59L9.41,8L8,9.41L10.59,12L8,14.59L9.41,16L12,13.41L14.59,16L16,14.59L13.41,12L16,9.41L14.59,8Z" /></svg>
             </div>
             <ul></ul>
           </div>
@@ -306,6 +318,14 @@ class EventCategoryForm extends HTMLElement {
                 </div>
                 <div class="form-element-input">
                   <input type="text" id="nombre" name="name">
+                </div>
+              </div>
+              <div class="form-element">
+                <div class="form-element-label">
+                  <label for="email">Email</label>
+                </div>
+                <div class="form-element-input">
+                  <input type="email" id="email" name="email">
                 </div>
               </div>
             </div>
@@ -443,4 +463,4 @@ class EventCategoryForm extends HTMLElement {
   }
 }
 
-customElements.define('event-categories-form-component', EventCategoryForm)
+customElements.define('promoters-form-component', PromotersForm)

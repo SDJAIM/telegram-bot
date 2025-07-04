@@ -1,11 +1,11 @@
 import { store } from '../../redux/store.js'
 import { setFilterQuery } from '../../redux/crud-slice.js'
 
-class UserFilter extends HTMLElement {
+class PromoterFilter extends HTMLElement {
   constructor () {
     super()
     this.shadow = this.attachShadow({ mode: 'open' })
-    this.endpoint = '/api/admin/users'
+    this.endpoint = '/api/admin/promoters'
     this.tableEndpoint = ''
     document.addEventListener('showFilterModal', this.showFilterModal.bind(this))
   }
@@ -214,4 +214,4 @@ class UserFilter extends HTMLElement {
   }
 }
 
-customElements.define('user-filter-component', UserFilter)
+customElements.define('promoters-filter-component', PromoterFilter)

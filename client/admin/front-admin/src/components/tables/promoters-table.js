@@ -1,11 +1,11 @@
 import { store } from '../../redux/store.js'
 import { showFormElement } from '../../redux/crud-slice.js'
 
-class EventCategoryTable extends HTMLElement {
+class PromoterTable extends HTMLElement {
   constructor () {
     super()
     this.shadow = this.attachShadow({ mode: 'open' })
-    this.endpoint = '/api/admin/event-categories'
+    this.endpoint = '/api/admin/promoters'
     this.filterQuery = null
     this.unsubscribe = null
   }
@@ -346,6 +346,10 @@ class EventCategoryTable extends HTMLElement {
       tableRegisterBodyList.appendChild(nameLi)
       nameLi.textContent = `Nombre: ${register.name}`
 
+      const emailLi = document.createElement('li')
+      emailLi.textContent = `Email: ${register.email}`
+      tableRegisterBodyList.appendChild(emailLi)
+
       const createdAtLi = document.createElement('li')
       createdAtLi.textContent = `Fecha de creación: ${register.createdAt}`
       tableRegisterBodyList.appendChild(createdAtLi)
@@ -423,4 +427,4 @@ class EventCategoryTable extends HTMLElement {
   }
 }
 
-customElements.define('event-categories-table-component', EventCategoryTable)
+customElements.define('promoters-table-component', PromoterTable)
