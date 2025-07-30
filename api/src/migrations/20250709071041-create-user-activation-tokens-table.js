@@ -1,9 +1,7 @@
 'use strict'
-
-/** @type {import('sequelize-cli').Migration} */
 module.exports = {
-  up: async (queryInterface, Sequelize) => {
-    await queryInterface.createTable('user_credentials', {
+  async up (queryInterface, Sequelize) {
+    await queryInterface.createTable('UserActivationTokens', {
       id: {
         allowNull: false,
         autoIncrement: true,
@@ -13,20 +11,23 @@ module.exports = {
       userId: {
         type: Sequelize.INTEGER,
         allowNull: false,
+        references: {
+          model: 'Users',
+          key: 'id'
+        }
       },
-      email: {
+      token: {
         type: Sequelize.STRING,
         allowNull: false,
-        unique: true,
+        unique: true
       },
-      password: {
-        type: Sequelize.STRING,
-        allowNull: false,
-      },
-      lastPasswordChange: {
+      expirationDate: {
         type: Sequelize.DATE,
-        allowNull: false,
-        defaultValue: Sequelize.NOW,
+        allowNull: false
+      },
+      used: {
+        type: Sequelize.BOOLEAN,
+        defaultValue: false
       },
       createdAt: {
         allowNull: false,
@@ -42,6 +43,6 @@ module.exports = {
     })
   },
   async down (queryInterface, Sequelize) {
-    await queryInterface.dropTable('user_credentials')
+    await queryInterface.dropTable('UserActivationTokens')
   }
 }

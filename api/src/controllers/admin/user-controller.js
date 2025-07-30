@@ -1,9 +1,17 @@
 const sequelizeDb = require('../../models/sequelize')
-const User = sequelizeDb.User
+const mongooseDb = require('../../models/mongoose')
+const UserSequelize = sequelizeDb.User
+const UserMongoose = mongooseDb.User
 const Op = sequelizeDb.Sequelize.Op
+
+// Helper to determine which DB to use
+const getActiveUserModel = () => {
+  return process.env.DB_TYPE === 'mongodb' ? UserMongoose : UserSequelize
+}
 
 exports.create = async (req, res, next) => {
   try {
+    const User = getActiveUserModel()
     const data = await User.create(req.body)
     res.status(200).send(data)
   } catch (err) {
@@ -31,6 +39,37 @@ exports.findAll = async (req, res, next) => {
       ? { [Op.and]: [whereStatement] }
       : {}
 
+    const User = getActiveUserModel()
+
+    if (process.env.DB_TYPE === 'mongodb') {
+      const query = {}
+      for (const key in req.query) {
+        if (req.query[key] !== '' && req.query[key] !== 'null' && key !== 'page' && key !== 'size') {
+          query[key] = new RegExp(req.query[key], 'i')
+        }
+      }
+
+      const [data, total] = await Promise.all([
+        User.find(query)
+          .skip(offset)
+          .limit(limit)
+          .sort({ createdAt: -1 })
+          .select('_id name email createdAt updatedAt'),
+        User.countDocuments(query)
+      ])
+
+      return res.status(200).send({
+        rows: data,
+        count: total,
+        meta: {
+          total,
+          pages: Math.ceil(total / limit),
+          currentPage: page,
+          size: limit
+        }
+      })
+    }
+
     const result = await User.findAndCountAll({
       where: condition,
       attributes: ['id', 'name', 'email', 'createdAt', 'updatedAt'],
@@ -55,7 +94,10 @@ exports.findAll = async (req, res, next) => {
 exports.findOne = async (req, res, next) => {
   try {
     const id = req.params.id
-    const data = await User.findByPk(id)
+    const User = getActiveUserModel()
+    const data = process.env.DB_TYPE === 'mongodb'
+      ? await User.findById(id)
+      : await User.findByPk(id)
 
     if (!data) {
       const err = new Error()
@@ -73,7 +115,15 @@ exports.findOne = async (req, res, next) => {
 exports.update = async (req, res, next) => {
   try {
     const id = req.params.id
-    const [numberRowsAffected] = await User.update(req.body, { where: { id } })
+    const User = getActiveUserModel()
+    let numberRowsAffected
+    if (process.env.DB_TYPE === 'mongodb') {
+      const result = await User.updateOne({ _id: id }, req.body)
+      numberRowsAffected = result.modifiedCount
+    } else {
+      const [result] = await User.update(req.body, { where: { id } })
+      numberRowsAffected = result
+    }
 
     if (numberRowsAffected !== 1) {
       const err = new Error()
@@ -97,7 +147,14 @@ exports.update = async (req, res, next) => {
 exports.delete = async (req, res, next) => {
   try {
     const id = req.params.id
-    const numberRowsAffected = await User.destroy({ where: { id } })
+    const User = getActiveUserModel()
+    let numberRowsAffected
+    if (process.env.DB_TYPE === 'mongodb') {
+      const result = await User.deleteOne({ _id: id })
+      numberRowsAffected = result.deletedCount
+    } else {
+      numberRowsAffected = await User.destroy({ where: { id } })
+    }
 
     if (numberRowsAffected !== 1) {
       const err = new Error()

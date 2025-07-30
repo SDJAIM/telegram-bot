@@ -1,7 +1,9 @@
 {
   "dependencies": {
     "express": "^5",
-    "http-proxy-middleware": "^2.0.6"
+    "http-proxy-middleware": "^2.0.6",
+    "sequelize": "^6.37.7",
+    "sequelize-cli": "^6.6.3"
   },
   "scripts": {
     "dev": "npm-run-all --parallel dev:front-admin dev:front-customer proxy",

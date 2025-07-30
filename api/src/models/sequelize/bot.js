@@ -10,7 +10,7 @@ module.exports = function (sequelize, DataTypes) {
       platform: {
         type: DataTypes.STRING,
         allowNull: false,
-        velidate: {
+        validate: {
           notNull: {
             msg: 'Por favor, rellena el campo "Plataforma".'
           },
@@ -32,7 +32,7 @@ module.exports = function (sequelize, DataTypes) {
         }
       },
       description: {
-        type: DataTypes.STRING,
+        type: DataTypes.TEXT,
         allowNull: false,
         validate: {
           notNull: {
@@ -73,7 +73,7 @@ module.exports = function (sequelize, DataTypes) {
       }
     }, {
       sequelize,
-      tableName: 'customers',
+      tableName: 'bots',
       timestamps: true,
       paranoid: true,
       indexes: [

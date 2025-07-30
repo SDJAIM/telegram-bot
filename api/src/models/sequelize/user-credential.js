@@ -51,6 +51,16 @@ module.exports = function (sequelize, DataTypes) {
           }
         }
       },
+      lastPasswordChange: {
+        type: DataTypes.DATE,
+        allowNull: false,
+        defaultValue: DataTypes.NOW,
+        validate: {
+          notNull: {
+            msg: 'Por favor, rellena el campo "Último cambio de contraseña".'
+          }
+        }
+      },
       createdAt: {
         type: DataTypes.DATE,
         get () {

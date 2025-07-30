@@ -12,6 +12,6 @@ module.exports = (mongoose) => {
     { timestamps: true }
   )
 
-  const user = mongoose.model('user', schema, 'users')
-  return user
+  const Language = mongoose.model('Language', schema, 'languages')
+  return Language
 }

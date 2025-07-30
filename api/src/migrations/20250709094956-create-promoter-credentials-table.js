@@ -1,47 +1,53 @@
 'use strict'
 
-/** @type {import('sequelize-cli').Migration} */
 module.exports = {
   up: async (queryInterface, Sequelize) => {
-    await queryInterface.createTable('user_credentials', {
+    await queryInterface.createTable('PROMOTER_CREDENTIALS', {
       id: {
-        allowNull: false,
-        autoIncrement: true,
+        type: Sequelize.INTEGER,
         primaryKey: true,
-        type: Sequelize.INTEGER
+        autoIncrement: true
       },
-      userId: {
+      promoterId: {
         type: Sequelize.INTEGER,
         allowNull: false,
+        references: {
+          model: 'PROMOTERS',
+          key: 'id'
+        }
       },
       email: {
         type: Sequelize.STRING,
         allowNull: false,
         unique: true,
+        validate: {
+          isEmail: true
+        }
       },
       password: {
         type: Sequelize.STRING,
-        allowNull: false,
+        allowNull: false
       },
       lastPasswordChange: {
         type: Sequelize.DATE,
         allowNull: false,
-        defaultValue: Sequelize.NOW,
+        defaultValue: Sequelize.NOW
       },
       createdAt: {
-        allowNull: false,
-        type: Sequelize.DATE
+        type: Sequelize.DATE,
+        allowNull: false
       },
       updatedAt: {
-        allowNull: false,
-        type: Sequelize.DATE
+        type: Sequelize.DATE,
+        allowNull: false
       },
       deletedAt: {
         type: Sequelize.DATE
       }
     })
   },
-  async down (queryInterface, Sequelize) {
-    await queryInterface.dropTable('user_credentials')
+
+  down: async (queryInterface) => {
+    await queryInterface.dropTable('PROMOTER_CREDENTIALS')
   }
 }
