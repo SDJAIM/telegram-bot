@@ -1,51 +1,128 @@
-const Town = require('../../models/sequelize/town')
-const { successResponse, errorResponse } = require('../../middlewares/error-handler')
+const sequelizeDb = require('../../models/sequelize')
+const Town = sequelizeDb.Town
+const Op = sequelizeDb.Sequelize.Op
 
-exports.create = async (req, res) => {
+exports.create = async (req, res, next) => {
   try {
-    const town = await Town.create(req.body)
-    return successResponse(res, town)
-  } catch (error) {
-    return errorResponse(res, error)
+    const data = await Town.create(req.body)
+    res.status(200).send(data)
+  } catch (err) {
+    if (err.name === 'SequelizeValidationError') {
+      err.statusCode = 422
+    }
+    next(err)
   }
 }
 
-exports.read = async (req, res) => {
+exports.findAll = async (req, res, next) => {
   try {
-    const town = await Town.findByPk(req.params.id)
-    return successResponse(res, town)
-  } catch (error) {
-    return errorResponse(res, error)
-  }
-}
+    const page = parseInt(req.query.page) || 1
+    const limit = parseInt(req.query.size) || 10
+    const offset = (page - 1) * limit
+    const whereStatement = {}
 
-exports.update = async (req, res) => {
-  try {
-    const town = await Town.update(req.body, {
-      where: { id: req.params.id }
+    for (const key in req.query) {
+      if (req.query[key] !== '' && req.query[key] !== 'null' && key !== 'page' && key !== 'size') {
+        whereStatement[key] = { [Op.substring]: req.query[key] }
+      }
+    }
+
+    const condition = Object.keys(whereStatement).length > 0 ? { [Op.and]: [whereStatement] } : {}
+
+    const result = await Town.findAndCountAll({
+      where: condition,
+      attributes: ['id', 'name', 'createdAt', 'updatedAt'],
+      limit,
+      offset,
+      order: [['createdAt', 'DESC']]
     })
-    return successResponse(res, town)
-  } catch (error) {
-    return errorResponse(res, error)
+
+    result.meta = {
+      total: result.count,
+      pages: Math.ceil(result.count / limit),
+      currentPage: page,
+      size: limit
+    }
+
+    res.status(200).send(result)
+  } catch (err) {
+    next(err)
   }
 }
 
-exports.delete = async (req, res) => {
+exports.findOne = async (req, res, next) => {
   try {
-    await Town.destroy({
-      where: { id: req.params.id }
+    const id = req.params.id
+    const data = await Town.findByPk(id)
+
+    if (!data) {
+      const err = new Error()
+      err.message = `No se puede encontrar el elemento con la id=${id}.`
+      err.statusCode = 404
+      throw err
+    }
+
+    res.status(200).send(data)
+  } catch (err) {
+    next(err)
+  }
+}
+
+exports.update = async (req, res, next) => {
+  try {
+    const id = req.params.id
+    const [numberRowsAffected] = await Town.update(req.body, { where: { id } })
+
+    if (numberRowsAffected !== 1) {
+      const err = new Error()
+      err.message = `No se puede actualizar el elemento con la id=${id}. Tal vez no se ha encontrado.`
+      err.statusCode = 404
+      throw err
+    }
+
+    res.status(200).send({
+      message: 'El elemento ha sido actualizado correctamente.'
     })
-    return successResponse(res, { message: 'Town deleted successfully' })
-  } catch (error) {
-    return errorResponse(res, error)
+  } catch (err) {
+    if (err.name === 'SequelizeValidationError') {
+      err.statusCode = 422
+    }
+
+    next(err)
   }
 }
 
-exports.list = async (req, res) => {
+exports.delete = async (req, res, next) => {
   try {
-    const towns = await Town.findAll()
-    return successResponse(res, towns)
-  } catch (error) {
-    return errorResponse(res, error)
+    const id = req.params.id
+    const numberRowsAffected = await Town.destroy({ where: { id } })
+
+    if (numberRowsAffected !== 1) {
+      const err = new Error()
+      err.message = `No se puede actualizar el elemento con la id=${id}. Tal vez no se ha encontrado.`
+      err.statusCode = 404
+      throw err
+    }
+
+    res.status(200).send({
+      message: 'El elemento ha sido borrado correctamente.'
+    })
+  } catch (err) {
+    next(err)
+  }
+}
+
+exports.getTowns = async (req, res, next) => {
+  try {
+    const result = await Town.findAll()
+
+    const response = result.map(item => ({
+      label: item.name,
+      value: item.id
+    }))
+
+    res.status(200).send(response)
+  } catch (err) {
+    next(err)
   }
 }

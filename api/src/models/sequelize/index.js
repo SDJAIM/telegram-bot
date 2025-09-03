@@ -1,5 +1,3 @@
-'use strict'
-
 const fs = require('fs')
 const Sequelize = require('sequelize')
 const path = require('path')
@@ -9,7 +7,6 @@ const sequelizeDb = {}
 const sequelize = new Sequelize(process.env.DATABASE_NAME, process.env.DATABASE_USER, process.env.DATABASE_PASSWORD, {
   host: process.env.DATABASE_HOST,
   dialect: process.env.DATABASE_DIALECT,
-
   pool: {
     max: 5,
     min: 0,
@@ -31,6 +28,7 @@ fs.readdirSync(__dirname)
       sequelize,
       Sequelize.DataTypes
     )
+
     sequelizeDb[model.name] = model
   })
 

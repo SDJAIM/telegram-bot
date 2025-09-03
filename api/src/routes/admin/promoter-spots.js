@@ -1,6 +1,6 @@
 const express = require('express')
 const router = express.Router()
-const controller = require('../../controllers/admin/promoter-spot-controller')
+const controller = require('../../controllers/admin/promoter-spot-controller.js')
 
 router.post('/', controller.create)
 router.get('/', controller.findAll)

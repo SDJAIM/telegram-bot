@@ -1,0 +1,74 @@
+<delete-element-modal-component></delete-element-modal-component>
+<image-gallery-component></image-gallery-component>
+<message-component></message-component>
+
+<header-component>
+  <row-component options='{"columns":"8fr 2fr", "height":"100px"}'>
+    <column-component>
+      <logo-component title="Pedidos"></logo-component>
+    </column-component>
+    <column-component options='{"justifyContent":"flex-end"}'>
+      <menu-component menu="admin"></menu-component>
+    </column-component>
+  </row-component>
+</header-component>
+
+<main-component padding="0.5rem">
+  <crud-component>
+    <!-- <table-filter
+      slot='filter'
+      url='/api/admin/users'
+    /> -->
+
+    <table-component 
+      slot="table"
+      endpoint="/api/admin/spots"
+      structure="{
+        'headers': [
+          {'label': 'Nombre', 'field': 'name'},
+          {'label': 'Fecha de creación', 'field': 'createdAt'},
+          {'label': 'Fecha de actualización', 'field': 'updatedAt'}
+        ],
+        'recordButtons': ['edit', 'remove'],
+        'tableButtons': ['filterButton']
+      }"
+    >
+    </table-component>
+
+    <form-component 
+      slot="form"
+      endpoint="/api/admin/spots"
+      structure="{
+        'tabs': [
+          {'name': 'general', 'label': 'General'}
+        ],
+        'inputs': {
+          'general': {
+            'noLocale': [
+              {'name': 'id', 'element':'input', 'type': 'hidden'},
+              {'name': 'name', 'element':'input', 'type': 'text', 'label': 'Nombre', 'width': 'half-width'},
+              {'name': 'environment', 'element':'select', 'label': 'Espacio', 'width': 'one-quarter-width', 'options': 
+                [
+                  {'label': 'Interior', 'value': 'indoor'},
+                  {'label': 'Exterior', 'value': 'outdoor'},
+                  {'label': 'Mixto', 'value': 'mixed'}
+                ]
+              },
+              {'name': 'isActive', 'element':'select', 'label': 'Estado', 'width': 'one-quarter-width', 'options': 
+                [
+                  {'label': 'Abierto', 'value': '1'},
+                  {'label': 'Cerrado', 'value': '0'}
+                ]
+              },
+              {'name': 'townId', 'element':'select', 'label': 'Población', 'width': 'one-quarter-width', 'endpoint': '/api/admin/towns/get-towns'},
+              {'name': 'address', 'element':'input', 'type': 'text', 'label': 'Dirección', 'width': 'one-quarter-width'},
+              {'name': 'latitude', 'element':'input', 'type': 'text', 'label': 'Latitud', 'width': 'one-quarter-width'},
+              {'name': 'longitude', 'element':'input', 'type': 'text', 'label': 'Longitud', 'width': 'one-quarter-width'},
+              {'name': 'description', 'element':'textarea', 'label': 'Descripción', 'width': 'full-width'}
+            ]
+          }
+        }
+      }">
+    </form-component>
+  </crud-component>
+</main-component>

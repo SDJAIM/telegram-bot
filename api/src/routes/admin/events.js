@@ -1,13 +1,11 @@
-'use strict'
 const express = require('express')
 const router = express.Router()
-const eventController = require('../../controllers/admin/event-controller')
-const { validateAdmin } = require('../../middlewares/user-tracking')
+const controller = require('../../controllers/admin/event-controller.js')
 
-router.get('/', validateAdmin, eventController.list)
-router.post('/', validateAdmin, eventController.create)
-router.get('/:id', validateAdmin, eventController.show)
-router.put('/:id', validateAdmin, eventController.update)
-router.delete('/:id', validateAdmin, eventController.delete)
+router.post('/', controller.create)
+router.get('/', controller.findAll)
+router.get('/:id', controller.findOne)
+router.put('/:id', controller.update)
+router.delete('/:id', controller.delete)
 
 module.exports = router

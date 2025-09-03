@@ -27,13 +27,11 @@ exports.findAll = async (req, res, next) => {
       }
     }
 
-    const condition = Object.keys(whereStatement).length > 0
-      ? { [Op.and]: [whereStatement] }
-      : {}
+    const condition = Object.keys(whereStatement).length > 0 ? { [Op.and]: [whereStatement] } : {}
 
     const result = await Customer.findAndCountAll({
       where: condition,
-      attributes: ['id', 'name', 'email', 'telephone', 'createdAt', 'updatedAt'],
+      attributes: ['id', 'name', 'email', 'createdAt', 'updatedAt'],
       limit,
       offset,
       order: [['createdAt', 'DESC']]

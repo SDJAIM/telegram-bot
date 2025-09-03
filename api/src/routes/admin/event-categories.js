@@ -2,6 +2,7 @@ const express = require('express')
 const router = express.Router()
 const controller = require('../../controllers/admin/event-category-controller.js')
 
+router.get('/get-categories', controller.getCategories)
 router.post('/', controller.create)
 router.get('/', controller.findAll)
 router.get('/:id', controller.findOne)

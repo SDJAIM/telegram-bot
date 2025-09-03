@@ -27,9 +27,7 @@ exports.findAll = async (req, res, next) => {
       }
     }
 
-    const condition = Object.keys(whereStatement).length > 0
-      ? { [Op.and]: [whereStatement] }
-      : {}
+    const condition = Object.keys(whereStatement).length > 0 ? { [Op.and]: [whereStatement] } : {}
 
     const result = await Promoter.findAndCountAll({
       where: condition,
@@ -109,6 +107,21 @@ exports.delete = async (req, res, next) => {
     res.status(200).send({
       message: 'El elemento ha sido borrado correctamente.'
     })
+  } catch (err) {
+    next(err)
+  }
+}
+
+exports.getPromoters = async (req, res, next) => {
+  try {
+    const result = await Promoter.findAll()
+
+    const response = result.map(item => ({
+      label: item.name,
+      value: item.id
+    }))
+
+    res.status(200).send(response)
   } catch (err) {
     next(err)
   }

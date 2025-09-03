@@ -1,87 +1,113 @@
-'use strict'
-const { CustomerEvent: SequelizeCustomerEvent } = require('../../models/sequelize')
-const { CustomerEvent: MongooseCustomerEvent } = require('../../models/mongoose')
-const db = require('../../config/config.json').database
+const sequelizeDb = require('../../models/sequelize')
+const CustomerEvent = sequelizeDb.CustomerEvent
+const Op = sequelizeDb.Sequelize.Op
 
-const list = async (req, res, next) => {
+exports.create = async (req, res, next) => {
   try {
-    const customerEvents = db === 'mongodb'
-      ? await MongooseCustomerEvent.find({ deletedAt: null }).populate('event')
-      : await SequelizeCustomerEvent.findAll({ where: { deletedAt: null }, include: ['event'] })
-    res.json(customerEvents)
-  } catch (error) {
-    next(error)
+    const data = await CustomerEvent.create(req.body)
+    res.status(200).send(data)
+  } catch (err) {
+    if (err.name === 'SequelizeValidationError') {
+      err.statusCode = 422
+    }
+    next(err)
   }
 }
 
-const create = async (req, res, next) => {
+exports.findAll = async (req, res, next) => {
   try {
-    const { eventId, description, price } = req.body
-    const data = db === 'mongodb'
-      ? { event: eventId, description, price }
-      : { eventId, description, price }
+    const page = parseInt(req.query.page) || 1
+    const limit = parseInt(req.query.size) || 10
+    const offset = (page - 1) * limit
+    const whereStatement = {}
 
-    const newCustomerEvent = db === 'mongodb'
-      ? await MongooseCustomerEvent.create(data)
-      : await SequelizeCustomerEvent.create(data)
+    for (const key in req.query) {
+      if (req.query[key] !== '' && req.query[key] !== 'null' && key !== 'page' && key !== 'size') {
+        whereStatement[key] = { [Op.substring]: req.query[key] }
+      }
+    }
 
-    res.status(201).json(newCustomerEvent)
-  } catch (error) {
-    next(error)
+    const condition = Object.keys(whereStatement).length > 0 ? { [Op.and]: [whereStatement] } : {}
+
+    const result = await CustomerEvent.findAndCountAll({
+      where: condition,
+      attributes: ['id', 'name', 'email', 'createdAt', 'updatedAt'],
+      limit,
+      offset,
+      order: [['createdAt', 'DESC']]
+    })
+
+    result.meta = {
+      total: result.count,
+      pages: Math.ceil(result.count / limit),
+      currentPage: page,
+      size: limit
+    }
+
+    res.status(200).send(result)
+  } catch (err) {
+    next(err)
   }
 }
 
-const show = async (req, res, next) => {
+exports.findOne = async (req, res, next) => {
   try {
-    const { id } = req.params
-    const customerEvent = db === 'mongodb'
-      ? await MongooseCustomerEvent.findById(id).populate('event')
-      : await SequelizeCustomerEvent.findByPk(id, { include: ['event'] })
+    const id = req.params.id
+    const data = await CustomerEvent.findByPk(id)
 
-    if (!customerEvent) return res.status(404).json({ error: 'Customer event not found' })
-    res.json(customerEvent)
-  } catch (error) {
-    next(error)
+    if (!data) {
+      const err = new Error()
+      err.message = `No se puede encontrar el elemento con la id=${id}.`
+      err.statusCode = 404
+      throw err
+    }
+
+    res.status(200).send(data)
+  } catch (err) {
+    next(err)
   }
 }
 
-const update = async (req, res, next) => {
+exports.update = async (req, res, next) => {
   try {
-    const { id } = req.params
-    const { eventId, description, price } = req.body
-    const data = db === 'mongodb'
-      ? { event: eventId, description, price }
-      : { eventId, description, price }
+    const id = req.params.id
+    const [numberRowsAffected] = await CustomerEvent.update(req.body, { where: { id } })
 
-    const updatedCustomerEvent = db === 'mongodb'
-      ? await MongooseCustomerEvent.findByIdAndUpdate(id, data, { new: true })
-      : await SequelizeCustomerEvent.update(data, { where: { id }, returning: true })
+    if (numberRowsAffected !== 1) {
+      const err = new Error()
+      err.message = `No se puede actualizar el elemento con la id=${id}. Tal vez no se ha encontrado.`
+      err.statusCode = 404
+      throw err
+    }
 
-    if (!updatedCustomerEvent) return res.status(404).json({ error: 'Customer event not found' })
-    res.json(updatedCustomerEvent)
-  } catch (error) {
-    next(error)
+    res.status(200).send({
+      message: 'El elemento ha sido actualizado correctamente.'
+    })
+  } catch (err) {
+    if (err.name === 'SequelizeValidationError') {
+      err.statusCode = 422
+    }
+
+    next(err)
   }
 }
 
-const destroy = async (req, res, next) => {
+exports.delete = async (req, res, next) => {
   try {
-    const { id } = req.params
-    const deleted = db === 'mongodb'
-      ? await MongooseCustomerEvent.findByIdAndUpdate(id, { deletedAt: new Date() })
-      : await SequelizeCustomerEvent.update({ deletedAt: new Date() }, { where: { id } })
+    const id = req.params.id
+    const numberRowsAffected = await CustomerEvent.destroy({ where: { id } })
 
-    if (!deleted) return res.status(404).json({ error: 'Customer event not found' })
-    res.status(204).end()
-  } catch (error) {
-    next(error)
+    if (numberRowsAffected !== 1) {
+      const err = new Error()
+      err.message = `No se puede actualizar el elemento con la id=${id}. Tal vez no se ha encontrado.`
+      err.statusCode = 404
+      throw err
+    }
+
+    res.status(200).send({
+      message: 'El elemento ha sido borrado correctamente.'
+    })
+  } catch (err) {
+    next(err)
   }
-}
-
-module.exports = {
-  list,
-  create,
-  show,
-  update,
-  destroy
 }

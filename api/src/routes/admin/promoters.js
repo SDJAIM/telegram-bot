@@ -2,6 +2,7 @@ const express = require('express')
 const router = express.Router()
 const controller = require('../../controllers/admin/promoter-controller.js')
 
+router.get('/get-promoters', controller.getPromoters)
 router.post('/', controller.create)
 router.get('/', controller.findAll)
 router.get('/:id', controller.findOne)

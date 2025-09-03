@@ -1,12 +1,10 @@
 module.exports = (mongoose) => {
   const schema = mongoose.Schema(
     {
-      title: String,
-      description: String,
-      isActive: {
-        type: Boolean,
-        default: true
-      },
+      name: String,
+      alias: String,
+      selected: Boolean,
+      default: Boolean,
       deletedAt: Date
     },
     { timestamps: true }

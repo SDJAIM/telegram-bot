@@ -1,60 +1,113 @@
-'use strict'
-const Event = require('../../models/sequelize/event')
-const { validationError, notFoundError } = require('../../middlewares/error-handler')
+const sequelizeDb = require('../../models/sequelize')
+const Event = sequelizeDb.Event
+const Op = sequelizeDb.Sequelize.Op
 
-module.exports = {
-  async list (req, res) {
-    try {
-      const events = await Event.findAll({
-        paranoid: false,
-        order: [['createdAt', 'DESC']]
-      })
-      res.json(events)
-    } catch (error) {
-      res.status(500).json({ error: error.message })
+exports.create = async (req, res, next) => {
+  try {
+    const data = await Event.create(req.body)
+    res.status(200).send(data)
+  } catch (err) {
+    if (err.name === 'SequelizeValidationError') {
+      err.statusCode = 422
     }
-  },
+    next(err)
+  }
+}
 
-  async create (req, res) {
-    try {
-      const event = await Event.create(req.body)
-      res.status(201).json(event)
-    } catch (error) {
-      validationError(error, req, res)
+exports.findAll = async (req, res, next) => {
+  try {
+    const page = parseInt(req.query.page) || 1
+    const limit = parseInt(req.query.size) || 10
+    const offset = (page - 1) * limit
+    const whereStatement = {}
+
+    for (const key in req.query) {
+      if (req.query[key] !== '' && req.query[key] !== 'null' && key !== 'page' && key !== 'size') {
+        whereStatement[key] = { [Op.substring]: req.query[key] }
+      }
     }
-  },
 
-  async show (req, res) {
-    try {
-      const event = await Event.findByPk(req.params.id, { paranoid: false })
-      if (!event) return notFoundError('Event not found', req, res)
-      res.json(event)
-    } catch (error) {
-      res.status(500).json({ error: error.message })
+    const condition = Object.keys(whereStatement).length > 0 ? { [Op.and]: [whereStatement] } : {}
+
+    const result = await Event.findAndCountAll({
+      where: condition,
+      attributes: ['id', 'title', 'createdAt', 'updatedAt'],
+      limit,
+      offset,
+      order: [['createdAt', 'DESC']]
+    })
+
+    result.meta = {
+      total: result.count,
+      pages: Math.ceil(result.count / limit),
+      currentPage: page,
+      size: limit
     }
-  },
 
-  async update (req, res) {
-    try {
-      const event = await Event.findByPk(req.params.id)
-      if (!event) return notFoundError('Event not found', req, res)
+    res.status(200).send(result)
+  } catch (err) {
+    next(err)
+  }
+}
 
-      await event.update(req.body)
-      res.json(event)
-    } catch (error) {
-      validationError(error, req, res)
+exports.findOne = async (req, res, next) => {
+  try {
+    const id = req.params.id
+    const data = await Event.findByPk(id)
+
+    if (!data) {
+      const err = new Error()
+      err.message = `No se puede encontrar el elemento con la id=${id}.`
+      err.statusCode = 404
+      throw err
     }
-  },
 
-  async delete (req, res) {
-    try {
-      const event = await Event.findByPk(req.params.id)
-      if (!event) return notFoundError('Event not found', req, res)
+    res.status(200).send(data)
+  } catch (err) {
+    next(err)
+  }
+}
 
-      await event.destroy()
-      res.status(204).end()
-    } catch (error) {
-      res.status(500).json({ error: error.message })
+exports.update = async (req, res, next) => {
+  try {
+    const id = req.params.id
+    const [numberRowsAffected] = await Event.update(req.body, { where: { id } })
+
+    if (numberRowsAffected !== 1) {
+      const err = new Error()
+      err.message = `No se puede actualizar el elemento con la id=${id}. Tal vez no se ha encontrado.`
+      err.statusCode = 404
+      throw err
     }
+
+    res.status(200).send({
+      message: 'El elemento ha sido actualizado correctamente.'
+    })
+  } catch (err) {
+    if (err.name === 'SequelizeValidationError') {
+      err.statusCode = 422
+    }
+
+    next(err)
+  }
+}
+
+exports.delete = async (req, res, next) => {
+  try {
+    const id = req.params.id
+    const numberRowsAffected = await Event.destroy({ where: { id } })
+
+    if (numberRowsAffected !== 1) {
+      const err = new Error()
+      err.message = `No se puede actualizar el elemento con la id=${id}. Tal vez no se ha encontrado.`
+      err.statusCode = 404
+      throw err
+    }
+
+    res.status(200).send({
+      message: 'El elemento ha sido borrado correctamente.'
+    })
+  } catch (err) {
+    next(err)
   }
 }

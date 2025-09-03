@@ -23,12 +23,14 @@ module.exports = function (sequelize, DataTypes) {
         type: DataTypes.STRING,
         allowNull: false,
         validate: {
+          isEmail: {
+            msg: 'Debe ser un e-mail válido'
+          },
           notNull: {
             msg: 'Por favor, rellena el campo "Email".'
           },
-
-          isEmail: {
-            msg: 'Por favor, introduce un email válido.'
+          notEmpty: {
+            msg: 'Por favor, rellena el campo "Email".'
           }
         }
       },
@@ -50,7 +52,7 @@ module.exports = function (sequelize, DataTypes) {
       }
     }, {
       sequelize,
-      tableName: 'promoters',
+      tableName: 'users',
       timestamps: true,
       paranoid: true,
       indexes: [
@@ -67,7 +69,14 @@ module.exports = function (sequelize, DataTypes) {
   )
 
   Model.associate = function (models) {
-
+    Model.hasOne(models.PromoterCredential, { as: 'promoterCredential', foreignKey: 'promoterId' })
+    Model.hasMany(models.PromoterActivationToken, { as: 'promoterActivationTokens', foreignKey: 'promoterId' })
+    Model.hasOne(models.PromoterActivationToken, { as: 'promoterActivationToken', foreignKey: 'promoterId', scope: { used: false } })
+    Model.hasMany(models.PromoterResetPasswordToken, { as: 'promoterResetPasswordTokens', foreignKey: 'promoterId' })
+    Model.hasOne(models.PromoterResetPasswordToken, { as: 'promoterResetPasswordToken', foreignKey: 'promoterId', scope: { used: false } })
+    Model.hasMany(models.PromoterSpot, { as: 'promoterSpots', foreignKey: 'promoterId' })
+    Model.hasMany(models.Event, { as: 'events', foreignKey: 'promoterId' })
+    Model.hasMany(models.Email, { as: 'promoterEmails', foreignKey: 'userId' })
   }
 
   return Model

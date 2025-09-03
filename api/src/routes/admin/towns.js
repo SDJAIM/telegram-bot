@@ -1,10 +1,11 @@
 const express = require('express')
 const router = express.Router()
-const controller = require('../../controllers/admin/town-controller')
+const controller = require('../../controllers/admin/town-controller.js')
 
+router.get('/get-towns', controller.getTowns)
 router.post('/', controller.create)
-router.get('/', controller.list)
-router.get('/:id', controller.read)
+router.get('/', controller.findAll)
+router.get('/:id', controller.findOne)
 router.put('/:id', controller.update)
 router.delete('/:id', controller.delete)
 

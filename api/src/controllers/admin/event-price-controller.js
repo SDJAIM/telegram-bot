@@ -1,87 +1,115 @@
-'use strict'
-const { EventPrice: SequelizeEventPrice } = require('../../models/sequelize')
-const { EventPrice: MongooseEventPrice } = require('../../models/mongoose')
-const db = require('../../config/config.json').database
+const sequelizeDb = require('../../models/sequelize')
+const EventPrice = sequelizeDb.EventPrice
+const Op = sequelizeDb.Sequelize.Op
 
-const list = async (req, res, next) => {
+exports.create = async (req, res, next) => {
   try {
-    const prices = db === 'mongodb'
-      ? await MongooseEventPrice.find({ deletedAt: null }).populate('event')
-      : await SequelizeEventPrice.findAll({ where: { deletedAt: null }, include: ['event'] })
-    res.json(prices)
-  } catch (error) {
-    next(error)
+    req.body.eventId = req.body.parentId
+    const data = await EventPrice.create(req.body)
+    res.status(200).send(data)
+  } catch (err) {
+    if (err.name === 'SequelizeValidationError') {
+      err.statusCode = 422
+    }
+    next(err)
   }
 }
 
-const create = async (req, res, next) => {
+exports.findAll = async (req, res, next) => {
   try {
-    const { eventId, description, price } = req.body
-    const data = db === 'mongodb'
-      ? { event: eventId, description, price }
-      : { eventId, description, price }
+    const page = parseInt(req.query.page) || 1
+    const limit = parseInt(req.query.size) || 10
+    const offset = (page - 1) * limit
+    const whereStatement = {}
+    whereStatement.eventId = req.query.parent
 
-    const newPrice = db === 'mongodb'
-      ? await MongooseEventPrice.create(data)
-      : await SequelizeEventPrice.create(data)
+    for (const key in req.query) {
+      if (req.query[key] !== '' && req.query[key] !== 'null' && key !== 'page' && key !== 'size' && key !== 'parent') {
+        whereStatement[key] = { [Op.substring]: req.query[key] }
+      }
+    }
 
-    res.status(201).json(newPrice)
-  } catch (error) {
-    next(error)
+    const condition = Object.keys(whereStatement).length > 0 ? { [Op.and]: [whereStatement] } : {}
+
+    const result = await EventPrice.findAndCountAll({
+      where: condition,
+      attributes: ['id', 'description', 'price', 'createdAt', 'updatedAt'],
+      limit,
+      offset,
+      order: [['createdAt', 'DESC']]
+    })
+
+    result.meta = {
+      total: result.count,
+      pages: Math.ceil(result.count / limit),
+      currentPage: page,
+      size: limit
+    }
+
+    res.status(200).send(result)
+  } catch (err) {
+    next(err)
   }
 }
 
-const show = async (req, res, next) => {
+exports.findOne = async (req, res, next) => {
   try {
-    const { id } = req.params
-    const price = db === 'mongodb'
-      ? await MongooseEventPrice.findById(id).populate('event')
-      : await SequelizeEventPrice.findByPk(id, { include: ['event'] })
+    const id = req.params.id
+    const data = await EventPrice.findByPk(id)
 
-    if (!price) return res.status(404).json({ error: 'Price not found' })
-    res.json(price)
-  } catch (error) {
-    next(error)
+    if (!data) {
+      const err = new Error()
+      err.message = `No se puede encontrar el elemento con la id=${id}.`
+      err.statusCode = 404
+      throw err
+    }
+
+    res.status(200).send(data)
+  } catch (err) {
+    next(err)
   }
 }
 
-const update = async (req, res, next) => {
+exports.update = async (req, res, next) => {
   try {
-    const { id } = req.params
-    const { eventId, description, price } = req.body
-    const data = db === 'mongodb'
-      ? { event: eventId, description, price }
-      : { eventId, description, price }
+    const id = req.params.id
+    const [numberRowsAffected] = await EventPrice.update(req.body, { where: { id } })
 
-    const updatedPrice = db === 'mongodb'
-      ? await MongooseEventPrice.findByIdAndUpdate(id, data, { new: true })
-      : await SequelizeEventPrice.update(data, { where: { id }, returning: true })
+    if (numberRowsAffected !== 1) {
+      const err = new Error()
+      err.message = `No se puede actualizar el elemento con la id=${id}. Tal vez no se ha encontrado.`
+      err.statusCode = 404
+      throw err
+    }
 
-    if (!updatedPrice) return res.status(404).json({ error: 'Price not found' })
-    res.json(updatedPrice)
-  } catch (error) {
-    next(error)
+    res.status(200).send({
+      message: 'El elemento ha sido actualizado correctamente.'
+    })
+  } catch (err) {
+    if (err.name === 'SequelizeValidationError') {
+      err.statusCode = 422
+    }
+
+    next(err)
   }
 }
 
-const destroy = async (req, res, next) => {
+exports.delete = async (req, res, next) => {
   try {
-    const { id } = req.params
-    const deleted = db === 'mongodb'
-      ? await MongooseEventPrice.findByIdAndUpdate(id, { deletedAt: new Date() })
-      : await SequelizeEventPrice.update({ deletedAt: new Date() }, { where: { id } })
+    const id = req.params.id
+    const numberRowsAffected = await EventPrice.destroy({ where: { id } })
 
-    if (!deleted) return res.status(404).json({ error: 'Price not found' })
-    res.status(204).end()
-  } catch (error) {
-    next(error)
+    if (numberRowsAffected !== 1) {
+      const err = new Error()
+      err.message = `No se puede actualizar el elemento con la id=${id}. Tal vez no se ha encontrado.`
+      err.statusCode = 404
+      throw err
+    }
+
+    res.status(200).send({
+      message: 'El elemento ha sido borrado correctamente.'
+    })
+  } catch (err) {
+    next(err)
   }
-}
-
-module.exports = {
-  list,
-  create,
-  show,
-  update,
-  destroy
 }

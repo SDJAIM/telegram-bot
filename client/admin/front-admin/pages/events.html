@@ -1,10 +1,133 @@
+<delete-element-modal-component></delete-element-modal-component>
+<image-gallery-component></image-gallery-component>
+<message-component></message-component>
+
 <header-component>
-  <title-component></title-component>
-  <menu-component></menu-component>
+  <row-component options='{"columns":"8fr 2fr", "height":"100px"}'>
+    <column-component>
+      <logo-component title="Pedidos"></logo-component>
+    </column-component>
+    <column-component options='{"justifyContent":"flex-end"}'>
+      <menu-component menu="admin"></menu-component>
+    </column-component>
+  </row-component>
 </header-component>
 
-<main-component>
-  <form-component></form-component>
-</main-component>
+<main-component padding="0.5rem">
+  <crud-component>
+    <!-- <table-filter
+      slot='filter'
+      url='/api/admin/users'
+    /> -->
 
-<font-loader-component></font-loader-component>
+    <table-component 
+      slot="table"
+      endpoint="/api/admin/events"
+      structure="{
+        'headers': [
+          {'label': 'Evento', 'field': 'title'},
+          {'label': 'Fecha de creación', 'field': 'createdAt'},
+          {'label': 'Fecha de actualización', 'field': 'updatedAt'}
+        ],
+        'recordButtons': ['edit', 'remove'],
+        'tableButtons': ['filterButton']
+      }"
+    >
+    </table-component>
+
+    <form-component 
+      slot="form"
+      endpoint="/api/admin/events"
+      structure="{
+        'tabs': [
+          {'name': 'general', 'label': 'General'},
+          {'name': 'occurrences', 'label': 'Fechas', 'dependant': 'true'}
+        ],
+        'inputs': {
+          'general': {
+            'noLocale': [
+              {'name': 'id', 'element':'input', 'type': 'hidden'},
+              {'name': 'promoterId', 'element':'select', 'label': 'Promotoras', 'width': 'one-quarter-width', 'endpoint': '/api/admin/promoters/get-promoters'},
+              {'name': 'townId', 'element':'select', 'label': 'Población', 'width': 'one-quarter-width', 'endpoint': '/api/admin/towns/get-towns'},
+              {'name': 'spotId', 'element':'select', 'label': 'Espacio de eventos', 'width': 'one-quarter-width', 'endpoint': '/api/admin/spots/get-spots'},
+              {'name': 'categoryId', 'element':'select', 'label': 'Categoría', 'width': 'one-quarter-width', 'endpoint': '/api/admin/event-categories/get-categories'},
+              {'name': 'title', 'element':'input', 'type': 'text', 'label': 'Título', 'width': 'full-width'},
+              {'name': 'description', 'element':'textarea', 'label': 'Descripción', 'width': 'full-width'},
+              {'element': 'dependants', 'childs': [
+                {
+                  'name': 'prices', 
+                  'label': 'Precios del evento',
+                  'locale': false,
+                  'structure': [
+                    {'element': 'subform', 'width': 'half-width', 'endpoint': '/api/admin/event-prices', 'structure': 
+                      {
+                        'tabs': [
+                          {'name': 'general', 'label': 'General'}
+                        ],
+                        'inputs': {
+                          'general': {
+                            'noLocale': [
+                              {'name': 'id', 'element':'input', 'type': 'hidden'},
+                              {'name': 'price', 'element':'input', 'type': 'number', 'label': 'Precio', 'width': 'full-width'},
+                              {'name': 'description', 'element':'textarea', 'label': 'Descripción', 'width': 'full-width'}
+                            ]
+                          }
+                        }
+                      }
+                    },
+                    {'element': 'subtable', 'width': 'half-width', 'endpoint': '/api/admin/event-prices', 'structure': 
+                      {
+                        'headers': [
+                          {'label': 'Precio', 'field': 'price'}
+                        ],
+                        'recordButtons': ['edit', 'remove']
+                      }
+                    }
+                  ]
+                }
+              ]}
+            ]
+          },
+          'occurrences': {
+            'noLocale': [
+              {'element': 'dependants', 'childs': [
+                {
+                  'name': 'occurrences', 
+                  'label': 'Calendario de fechas',
+                  'locale': false,
+                  'structure': [
+                    {'element': 'subform', 'width': 'half-width', 'endpoint': '/api/admin/event-occurrences', 'structure': 
+                      {
+                        'tabs': [
+                          {'name': 'general', 'label': 'General'}
+                        ],
+                        'inputs': {
+                          'general': {
+                            'noLocale': [
+                              {'name': 'id', 'element':'input', 'type': 'hidden'},
+                              {'name': 'startDateTime', 'element':'input', 'type': 'datetime-local', 'label': 'Fecha de inicio', 'width': 'full-width'},
+                              {'name': 'endDateTime', 'element':'input', 'type': 'datetime-local', 'label': 'Fecha de inicio', 'width': 'full-width'}
+                            ]
+                          }
+                        }
+                      }
+                    },
+                    {'element': 'subtable', 'width': 'half-width', 'endpoint': '/api/admin/event-occurrences', 'structure': 
+                      {
+                        'headers': [
+                          {'label': 'Fecha de inicio', 'field': 'startDateTime'},
+                          {'label': 'Fecha de fin', 'field': 'endDateTime'}
+                        ],
+                        'recordButtons': ['edit', 'remove']
+                      }
+                    }
+                  ]
+                }
+              ]}
+            ]
+          }
+        }
+      }">
+    </form-component>
+  </crud-component>
+</main-component>

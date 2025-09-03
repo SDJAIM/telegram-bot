@@ -1,64 +1,65 @@
-'use strict'
-const { Model } = require('sequelize')
-
-module.exports = (sequelize, DataTypes) => {
-  class PromoterCredential extends Model {
-    static associate (models) {
-      PromoterCredential.belongsTo(models.Promoter, {
-        foreignKey: 'promoterId',
-        as: 'promoter'
-      })
+module.exports = function (sequelize, DataTypes) {
+  const PromoterCredential = sequelize.define('PromoterCredential',
+    {
+      id: {
+        type: DataTypes.INTEGER,
+        autoIncrement: true,
+        primaryKey: true,
+        allowNull: false
+      },
+      promoterId: {
+        type: DataTypes.INTEGER,
+        allowNull: false
+      },
+      email: {
+        type: DataTypes.STRING,
+        allowNull: false
+      },
+      password: {
+        type: DataTypes.STRING,
+        allowNull: false
+      },
+      lastPasswordChange: {
+        type: DataTypes.DATE,
+        allowNull: false
+      },
+      createdAt: {
+        type: DataTypes.DATE,
+        get () {
+          return this.getDataValue('createdAt')
+            ? this.getDataValue('createdAt').toISOString().split('T')[0]
+            : null
+        }
+      },
+      updatedAt: {
+        type: DataTypes.DATE,
+        get () {
+          return this.getDataValue('updatedAt')
+            ? this.getDataValue('updatedAt').toISOString().split('T')[0]
+            : null
+        }
+      }
+    }, {
+      sequelize,
+      tableName: 'promoter_credentials',
+      timestamps: true,
+      paranoid: true,
+      indexes: [
+        {
+          name: 'PRIMARY',
+          unique: true,
+          using: 'BTREE',
+          fields: [
+            { name: 'id' }
+          ]
+        }
+      ]
     }
+  )
+
+  PromoterCredential.associate = function (models) {
+    PromoterCredential.belongsTo(models.Promoter, { as: 'promoter', foreignKey: 'promoterId' })
   }
-
-  PromoterCredential.init({
-    id: {
-      type: DataTypes.INTEGER,
-      primaryKey: true,
-      autoIncrement: true
-    },
-    promoterId: {
-      type: DataTypes.INTEGER,
-      allowNull: false,
-      references: {
-        model: 'PROMOTERS',
-        key: 'id'
-      }
-    },
-    email: {
-      type: DataTypes.STRING,
-      allowNull: false,
-      unique: true,
-      validate: {
-        isEmail: true
-      }
-    },
-    password: {
-      type: DataTypes.STRING,
-      allowNull: false
-    },
-    lastPasswordChange: {
-      type: DataTypes.DATE,
-      allowNull: false,
-      defaultValue: DataTypes.NOW
-    },
-    createdAt: {
-      type: DataTypes.DATE,
-      allowNull: false
-    },
-    updatedAt: {
-      type: DataTypes.DATE,
-      allowNull: false
-    },
-    deletedAt: {
-      type: DataTypes.DATE
-    }
-  }, {
-    sequelize,
-    modelName: 'PromoterCredential',
-    tableName: 'PROMOTER_CREDENTIALS',
-    paranoid: true
-  })
 
   return PromoterCredential
 }

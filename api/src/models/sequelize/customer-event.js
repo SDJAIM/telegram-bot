@@ -1,29 +1,72 @@
-'use strict'
-
-module.exports = (sequelize, DataTypes) => {
-  const CustomerEvent = sequelize.define('CustomerEvent', {
-    customerId: {
-      type: DataTypes.INTEGER,
-      allowNull: false,
-      references: {
-        model: 'customers',
-        key: 'id'
+module.exports = function (sequelize, DataTypes) {
+  const Model = sequelize.define('CustomerEvent',
+    {
+      id: {
+        type: DataTypes.INTEGER,
+        autoIncrement: true,
+        primaryKey: true,
+        allowNull: false
+      },
+      customerId: {
+        type: DataTypes.INTEGER,
+        allowNull: false
+      },
+      eventId: {
+        type: DataTypes.INTEGER,
+        allowNull: false
+      },
+      createdAt: {
+        type: DataTypes.DATE,
+        get () {
+          return this.getDataValue('createdAt')
+            ? this.getDataValue('createdAt').toISOString().split('T')[0]
+            : null
+        }
+      },
+      updatedAt: {
+        type: DataTypes.DATE,
+        get () {
+          return this.getDataValue('updatedAt')
+            ? this.getDataValue('updatedAt').toISOString().split('T')[0]
+            : null
+        }
       }
-    },
-    eventId: {
-      type: DataTypes.INTEGER,
-      allowNull: false,
-      references: {
-        model: 'events',
-        key: 'id'
-      }
-    },
-    deletedAt: DataTypes.DATE
-  }, {
-    paranoid: true,
-    underscored: true,
-    tableName: 'customer_events'
-  })
+    }, {
+      sequelize,
+      tableName: 'customer_events',
+      timestamps: true,
+      paranoid: true,
+      indexes: [
+        {
+          name: 'PRIMARY',
+          unique: true,
+          using: 'BTREE',
+          fields: [
+            { name: 'id' }
+          ]
+        },
+        {
+          name: 'customer_events_customerId',
+          using: 'BTREE',
+          fields: [
+            { name: 'customerId' }
+          ]
+        },
+        {
+          name: 'customer_events_eventId',
+          using: 'BTREE',
+          fields: [
+            { name: 'eventId' }
+          ]
+        }
+      ]
+    }
+  )
 
-  return CustomerEvent
+  Model.associate = function (models) {
+    Model.belongsTo(models.Customer, { as: 'customer', foreignKey: 'customerId' })
+    Model.belongsTo(models.Event, { as: 'event', foreignKey: 'eventId' })
+  }
+
+  return Model
 }

@@ -1,52 +1,65 @@
-'use strict'
-
-const { Model } = require('sequelize')
-
-module.exports = (sequelize, DataTypes) => {
-  class PromoterActivationToken extends Model {
-    static associate (models) {
-      PromoterActivationToken.belongsTo(models.Promoter, {
-        foreignKey: 'promoterId',
-        as: 'promoter'
-      })
-    }
-  }
-
-  PromoterActivationToken.init({
-    id: {
-      type: DataTypes.INTEGER,
-      primaryKey: true,
-      autoIncrement: true
-    },
-    promoterId: {
-      type: DataTypes.INTEGER,
-      allowNull: false,
-      references: {
-        model: 'PROMOTERS',
-        key: 'id'
+module.exports = function (sequelize, DataTypes) {
+  const PromoterActivationToken = sequelize.define('PromoterActivationToken',
+    {
+      id: {
+        type: DataTypes.INTEGER,
+        autoIncrement: true,
+        primaryKey: true,
+        allowNull: false
+      },
+      promoterId: {
+        type: DataTypes.INTEGER,
+        allowNull: false
+      },
+      token: {
+        type: DataTypes.STRING,
+        allowNull: false
+      },
+      expirationDate: {
+        type: DataTypes.DATE,
+        allowNull: false
+      },
+      used: {
+        type: DataTypes.BOOLEAN,
+        allowNull: false
+      },
+      createdAt: {
+        type: DataTypes.DATE,
+        get () {
+          return this.getDataValue('createdAt')
+            ? this.getDataValue('createdAt').toISOString().split('T')[0]
+            : null
+        }
+      },
+      updatedAt: {
+        type: DataTypes.DATE,
+        get () {
+          return this.getDataValue('updatedAt')
+            ? this.getDataValue('updatedAt').toISOString().split('T')[0]
+            : null
+        }
       }
-    },
-    token: {
-      type: DataTypes.STRING,
-      allowNull: false,
-      unique: true
-    },
-    expirationDate: {
-      type: DataTypes.DATE,
-      allowNull: false
-    },
-    used: {
-      type: DataTypes.BOOLEAN,
-      allowNull: false,
-      defaultValue: false
+    }, {
+      sequelize,
+      tableName: 'promoter_activation_tokens',
+      timestamps: true,
+      paranoid: true,
+      indexes: [
+        {
+          name: 'PRIMARY',
+          unique: true,
+          using: 'BTREE',
+          fields: [
+            { name: 'id' }
+          ]
+        }
+      ]
     }
-  }, {
-    sequelize,
-    modelName: 'PromoterActivationToken',
-    tableName: 'PROMOTER_ACTIVATION_TOKENS',
-    paranoid: true,
-    timestamps: true
-  })
+  )
+
+  PromoterActivationToken.associate = function (models) {
+    PromoterActivationToken.belongsTo(models.Promoter, { as: 'promoter', foreignKey: 'promoterId' })
+  }
 
   return PromoterActivationToken
 }

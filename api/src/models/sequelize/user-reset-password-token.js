@@ -1,58 +1,65 @@
-'use strict'
-
-const { Model } = require('sequelize')
-
-module.exports = (sequelize, DataTypes) => {
-  class UserResetPasswordToken extends Model {
-    static associate (models) {
-      this.belongsTo(models.User, {
-        foreignKey: 'userId',
-        as: 'user'
-      })
-    }
-  }
-
-  UserResetPasswordToken.init({
-    id: {
-      type: DataTypes.INTEGER,
-      primaryKey: true,
-      autoIncrement: true
-    },
-    userId: {
-      type: DataTypes.INTEGER,
-      allowNull: false,
-      references: {
-        model: 'USERS',
-        key: 'id'
+module.exports = function (sequelize, DataTypes) {
+  const UserResetPasswordToken = sequelize.define('UserResetPasswordToken',
+    {
+      id: {
+        type: DataTypes.INTEGER,
+        autoIncrement: true,
+        primaryKey: true,
+        allowNull: false
+      },
+      userId: {
+        type: DataTypes.INTEGER,
+        allowNull: false
+      },
+      token: {
+        type: DataTypes.STRING,
+        allowNull: false
+      },
+      expirationDate: {
+        type: DataTypes.DATE,
+        allowNull: false
+      },
+      used: {
+        type: DataTypes.BOOLEAN,
+        allowNull: false
+      },
+      createdAt: {
+        type: DataTypes.DATE,
+        get () {
+          return this.getDataValue('createdAt')
+            ? this.getDataValue('createdAt').toISOString().split('T')[0]
+            : null
+        }
+      },
+      updatedAt: {
+        type: DataTypes.DATE,
+        get () {
+          return this.getDataValue('updatedAt')
+            ? this.getDataValue('updatedAt').toISOString().split('T')[0]
+            : null
+        }
       }
-    },
-    token: {
-      type: DataTypes.STRING,
-      allowNull: false
-    },
-    expirationDate: {
-      type: DataTypes.DATE,
-      allowNull: false
-    },
-    used: {
-      type: DataTypes.BOOLEAN,
-      defaultValue: false
-    },
-    createdAt: {
-      type: DataTypes.DATE,
-      allowNull: false
-    },
-    updatedAt: {
-      type: DataTypes.DATE,
-      allowNull: false
+    }, {
+      sequelize,
+      tableName: 'user_reset_password_tokens',
+      timestamps: true,
+      paranoid: true,
+      indexes: [
+        {
+          name: 'PRIMARY',
+          unique: true,
+          using: 'BTREE',
+          fields: [
+            { name: 'id' }
+          ]
+        }
+      ]
     }
-  }, {
-    sequelize,
-    modelName: 'UserResetPasswordToken',
-    tableName: 'USER_RESET_PASSWORD_TOKENS',
-    timestamps: true,
-    paranoid: false
-  })
+  )
+
+  UserResetPasswordToken.associate = function (models) {
+    UserResetPasswordToken.belongsTo(models.User, { as: 'user', foreignKey: 'userId' })
+  }
 
   return UserResetPasswordToken
 }
