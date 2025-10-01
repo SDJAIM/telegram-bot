@@ -2,10 +2,35 @@ const mongooseDb = require('../../models/mongoose')
 const Chat = mongooseDb.Chat
 const OpenAIService = require('../../services/openai-service')
 
+exports.getChat = async (req, res) => {
+  try {
+    const threadId = req.params.threadId
+    const chat = await Chat.findOne({ threadId })
+      .lean()
+      .exec()
+
+    if (chat) {
+      const response = chat.messages.map(message => {
+        return {
+          role: message.role,
+          content: message.content[0].text.value
+        }
+      })
+      res.status(200).send(response)
+    } else {
+      res.status(404).send({ message: 'Chat no encontrado' })
+    }
+  } catch (error) {
+    console.log(error)
+    res.status(500).send({ message: 'Error al obtener el chat' })
+  }
+}
+
 exports.assistantResponse = async (req, res) => {
   try {
     const openai = new OpenAIService()
     const prompt = req.body.prompt
+    let escalateToHuman = false
 
     if (req.body.threadId) {
       await openai.setThread(req.body.threadId)
@@ -24,18 +49,22 @@ exports.assistantResponse = async (req, res) => {
         const data = JSON.parse(tool.function.arguments)
 
         if (tool.function.name === 'escalate_to_human_due_to_user_behavior') {
-          await this.escalateToHumanUserBehavior(data)
+          this.escalateToHumanUserBehavior(req, data.conversationContext, openai.threadId)
+          escalateToHuman = true
+
           toolsOutputs.push({
             tool_call_id: tool.id,
-            output: 'Responder al usuario que espere un momento para ser atendido por un agente humano que tratará su consulta.'
+            output: 'Un humano se va a incorporar a la conversación para resolver la consulta del usuario.'
           })
         }
 
         if (tool.function.name === 'escalate_to_human_no_answer') {
-          await this.escalateToHumanNoAnswer(data)
+          this.escalateToHumanNoAnswer(req, data.conversationContext, openai.threadId)
+          escalateToHuman = true
+
           toolsOutputs.push({
             tool_call_id: tool.id,
-            output: 'Responder al usuario que espere un momento para ser atendido por un agente humano que tratará su consulta.'
+            output: 'Un humano se va a incorporar a la conversación para resolver la consulta del usuario.'
           })
         }
       }
@@ -61,24 +90,36 @@ exports.assistantResponse = async (req, res) => {
       })
     }
 
+    let answer = openai.answer
+    try { answer = JSON.parse(openai.answer) } catch (_) {}
+
     const response = {
       threadId: openai.threadId,
-      answer: JSON.parse(openai.answer)
+      escalateToHuman,
+      answer
     }
 
     res.status(200).send(response)
   } catch (error) {
-    console.log(error)
-    res.status(500).send({ error: error.message })
+    res.status(500).send({ message: 'Error al obtener el chat' })
   }
 }
 
-exports.escalateToHumanUserBehavior = async (data) => {
-  console.log('Escalando a humano por comportamiento del usuario:', data)
-  // Implementar lógica de escalado
+exports.relayUserMessage = async (req, res) => {
+  try {
+    const { message, threadId } = req.body
+    req.telegramService.relayUserMessage(threadId, message)
+    res.status(200).send({ message: 'Mensaje enviado al humano' })
+  } catch (error) {
+    console.log(error)
+    res.status(500).send({ message: 'Error al enviar el mensaje al humano' })
+  }
 }
 
-exports.escalateToHumanNoAnswer = async (data) => {
-  console.log('Escalando a humano por falta de respuesta:', data)
-  // Implementar lógica de escalado
+exports.escalateToHumanUserBehavior = (req, conversationContext, threadId) => {
+  req.telegramService.escalateToHuman(threadId, conversationContext)
+}
+
+exports.escalateToHumanNoAnswer = (req, conversationContext, threadId) => {
+  req.telegramService.escalateToHuman(threadId, conversationContext)
 }
