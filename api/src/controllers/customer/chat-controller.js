@@ -67,6 +67,15 @@ exports.assistantResponse = async (req, res) => {
             output: 'Un humano se va a incorporar a la conversación para resolver la consulta del usuario.'
           })
         }
+
+        if (tool.function.name === '"search_product') {
+          const response = this.searchProduct(data.userQuestion)
+
+          toolsOutputs.push({
+            tool_call_id: tool.id,
+            output: JSON.stringify(response)
+          })
+        }
       }
 
       await openai.submitToolOutputs(toolsOutputs)
