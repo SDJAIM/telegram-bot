@@ -1,2 +1,31 @@
+# Dependencies
 /node_modules
-package-lock.json
+
+# Environment variables
+.env
+*.env
+
+# Build artifacts
+dist/
+build/
+*.log
+
+# Editor/IDE
+.idea/
+.vscode/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# ChromaDB
+chroma-data/
+chromadb/
+*.chromadb/
+chroma
+
+# Otros archivos de bases de datos vectoriales similares
+*.sqlite
+*.db
+data

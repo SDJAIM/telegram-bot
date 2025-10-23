@@ -1,4 +1,5 @@
 import './components/font-loader.js'
+import './components/search.js'
 import './components/hero.js'
 import './components/features-titles.js'
 import './components/cards.js'

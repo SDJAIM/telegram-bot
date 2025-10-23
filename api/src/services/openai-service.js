@@ -9,6 +9,8 @@ module.exports = class OpenAIService {
     this.threadId = null
     this.messages = null
     this.answer = null
+    this.retryCount = 0
+    this.maxRetries = 5
   }
 
   async getAssistants () {
@@ -79,6 +81,11 @@ module.exports = class OpenAIService {
       }
 
       if (this.run.status === 'queued' || this.run.status === 'in_progress') {
+        if (this.retryCount >= this.maxRetries) {
+          throw new Error('Maximum retries exceeded while waiting for run completion')
+        }
+        this.retryCount += 1
+
         await this.sleep(2000)
 
         this.run = await this.openai.beta.threads.runs.retrieve(

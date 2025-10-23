@@ -11,5 +11,6 @@ router.use('/admin/towns', require('./admin/towns'))
 router.use('/customer/faqs', require('./customer/faqs'))
 router.use('/customer/heroes', require('./customer/heroes'))
 router.use('/customer/chats', require('./customer/chats'))
+router.use('/customer/search', require('./customer/search'))
 
 module.exports = router

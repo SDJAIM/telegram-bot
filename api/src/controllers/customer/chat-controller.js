@@ -68,12 +68,19 @@ exports.assistantResponse = async (req, res) => {
           })
         }
 
-        if (tool.function.name === '"search_product') {
-          const response = this.searchProduct(data.userQuestion)
+        if (tool.function.name === 'search_product') {
+          const response = await this.searchProduct(data.userQuestion)
 
           toolsOutputs.push({
             tool_call_id: tool.id,
             output: JSON.stringify(response)
+          })
+        }
+        // Add fallback for unrecognized tools
+        else {
+          toolsOutputs.push({
+            tool_call_id: tool.id,
+            output: 'Tool not recognized'
           })
         }
       }
@@ -110,7 +117,11 @@ exports.assistantResponse = async (req, res) => {
 
     res.status(200).send(response)
   } catch (error) {
-    res.status(500).send({ message: 'Error al obtener el chat' })
+    console.error('Chat controller error:', error)
+    res.status(500).send({
+      message: 'Error processing chat request',
+      error: error.message
+    })
   }
 }
 
@@ -131,4 +142,42 @@ exports.escalateToHumanUserBehavior = (req, conversationContext, threadId) => {
 
 exports.escalateToHumanNoAnswer = (req, conversationContext, threadId) => {
   req.telegramService.escalateToHuman(threadId, conversationContext)
+}
+
+// Funci�n para b�squeda de productos desde el chat
+exports.searchProduct = async (searchText) => {
+  try {
+    const { ChromaClient } = require('chromadb')
+    const client = new ChromaClient({
+      host: 'localhost',
+      port: 8000,
+      ssl: false
+    })
+
+    console.log(' B�squeda desde chat:', searchText)
+
+    // Validar longitud m�nima
+    if (!searchText || searchText.length < 5) {
+      return { error: 'La b�squeda requiere al menos 5 caracteres' }
+    }
+
+    const collection = await client.getCollection({ name: 'products' })
+    const results = await collection.query({
+      queryTexts: [searchText],
+      nResults: 3
+    })
+
+    // Formatear resultados
+    const products = results.ids[0].map((id, index) => ({
+      id,
+      name: results.metadatas[0][index].name,
+      score: results.distances[0][index]
+    }))
+
+    console.log(' Productos encontrados desde chat:', products.length)
+    return { results: products }
+  } catch (error) {
+    console.error(' Error en searchProduct:', error)
+    return { error: 'Error en la b�squeda de productos' }
+  }
 }
