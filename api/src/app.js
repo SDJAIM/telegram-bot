@@ -4,6 +4,15 @@ const userAgentMiddleware = require('./middlewares/user-agent')
 const errorHandlerMiddleware = require('./middlewares/error-handler')
 const userTrackingMiddleware = require('./middlewares/user-tracking')
 const exposeServiceMiddleware = require('./middlewares/expose-services')
+const IORedis = require('ioredis')
+const redisClient = new IORedis(process.env.REDIS_URL)
+const subscriberClient = new IORedis(process.env.REDIS_URL)
+require('./events')(redisClient, subscriberClient)
+
+app.use((req, res, next) => {
+  req.redisClient = redisClient
+  next()
+})
 
 const router = require('./routes')
 

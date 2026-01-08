@@ -3,8 +3,10 @@
     "@chroma-core/default-embed": "^0.1.8",
     "chromadb": "^3.0.17",
     "dotenv": "^17.2.3",
+    "ejs": "^3.1.10",
     "express": "^5",
     "http-proxy-middleware": "^2.0.6",
+    "ioredis": "^5.9.0",
     "sequelize": "^6.37.7",
     "sequelize-cli": "^6.6.3",
     "ws": "^8.18.3"
