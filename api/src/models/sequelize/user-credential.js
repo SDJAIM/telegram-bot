@@ -1,3 +1,5 @@
+const bcrypt = require('bcrypt')
+
 module.exports = function (sequelize, DataTypes) {
   const Model = sequelize.define('UserCredential',
     {
@@ -48,6 +50,10 @@ module.exports = function (sequelize, DataTypes) {
           },
           notEmpty: {
             msg: 'Por favor, rellena el campo "Contraseña".'
+          },
+          len: {
+            args: [6, 255],
+            msg: 'La contraseña debe tener al menos 6 caracteres'
           }
         }
       },
@@ -79,7 +85,7 @@ module.exports = function (sequelize, DataTypes) {
       }
     }, {
       sequelize,
-      tableName: 'users',
+      tableName: 'user_credentials',
       timestamps: true,
       paranoid: true,
       indexes: [
@@ -91,12 +97,36 @@ module.exports = function (sequelize, DataTypes) {
             { name: 'id' }
           ]
         }
-      ]
+      ],
+      // AGREGAR HOOKS PARA HASH DE CONTRASEÑAS
+      hooks: {
+        beforeCreate: async (userCredential) => {
+          if (userCredential.password) {
+            const salt = await bcrypt.genSalt(10)
+            userCredential.password = await bcrypt.hash(userCredential.password, salt)
+          }
+        },
+        beforeUpdate: async (userCredential) => {
+          if (userCredential.changed('password')) {
+            const salt = await bcrypt.genSalt(10)
+            userCredential.password = await bcrypt.hash(userCredential.password, salt)
+            userCredential.lastPasswordChange = new Date()
+          }
+        }
+      }
     }
   )
 
-  Model.associate = function (models) {
+  // AGREGAR MÉTODO PARA COMPARAR CONTRASEÑAS
+  Model.prototype.comparePassword = async function (candidatePassword) {
+    return await bcrypt.compare(candidatePassword, this.password)
+  }
 
+  Model.associate = function (models) {
+    Model.belongsTo(models.User, {
+      foreignKey: 'userId',
+      as: 'user'
+    })
   }
 
   return Model

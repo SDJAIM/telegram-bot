@@ -1,5 +1,6 @@
 import { store } from '../../redux/store.js'
 import { showFormElement } from '../../redux/crud-slice.js'
+import { apiFetch } from '../../utils/api.js'
 
 class UserTable extends HTMLElement {
   constructor () {
@@ -31,7 +32,7 @@ class UserTable extends HTMLElement {
 
   async loadData (endpoint = this.endpoint) {
     try {
-      const response = await fetch(endpoint)
+      const response = await apiFetch(endpoint)
 
       if (!response.ok) {
         throw new Error(`Error fetching data: ${response.statusText}`)
@@ -40,7 +41,7 @@ class UserTable extends HTMLElement {
       this.data = await response.json()
     } catch (error) {
       console.error('Error loading data:', error)
-      this.data = []
+      this.data = { rows: [], meta: { total: 0, pages: 1, currentPage: 1, size: 10 } }
     }
   }
 
@@ -378,7 +379,7 @@ class UserTable extends HTMLElement {
         const endpoint = `${this.endpoint}/${id}`
 
         try {
-          const response = await fetch(endpoint)
+          const response = await apiFetch(endpoint)
 
           if (!response.ok) {
             throw new Error('Failed to fetch record')

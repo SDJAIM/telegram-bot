@@ -1,6 +1,7 @@
 import isEqual from 'lodash-es/isEqual'
 import { store } from '../../redux/store.js'
 import { refreshTable } from '../../redux/crud-slice.js'
+import { apiFetch } from '../../utils/api.js'
 
 class UserForm extends HTMLElement {
   constructor () {
@@ -360,11 +361,8 @@ class UserForm extends HTMLElement {
         delete formDataJson.id
 
         try {
-          const response = await fetch(endpoint, {
+          const response = await apiFetch(endpoint, {
             method,
-            headers: {
-              'Content-Type': 'application/json'
-            },
             body: JSON.stringify(formDataJson)
           })
 

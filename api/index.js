@@ -1,6 +1,4 @@
 // Load environment variables first
-const path = require('path')
-require('dotenv').config({ path: path.join(__dirname, '.env') })
 console.log('Dialect cargado:', process.env.DATABASE_DIALECT)
 
 global.__basedir = __dirname
