@@ -1,0 +1,554 @@
+  📋 CHECKLIST COMPLETO PARA ARRANCAR
+
+  Paso 1: Instalar Dependencias
+
+  cd E:\susan\git\telegram-bot\api
+  npm install
+
+  Paso 2: Configurar Sequelize
+
+  cd src/config
+  copy config-example.json config.json
+  # Editar config.json con tus credenciales MySQL
+
+  Paso 3: Crear .env
+
+  cd E:\susan\git\telegram-bot\api
+  copy .env.example .env
+  # Editar .env con tus valores reales
+
+  Paso 4: Instalar y Arrancar Redis
+
+  # Windows con WSL:
+  wsl
+  sudo apt-get install redis-server
+  sudo service redis-server start
+
+  # Verificar:
+  redis-cli ping  # Debe responder PONG
+
+  Paso 5: Crear Base de Datos
+
+  # En MySQL:
+  mysql -u root -p
+  CREATE DATABASE `telegram-bot`;
+  exit;
+
+  Paso 6: Ejecutar Migraciones
+
+  cd E:\susan\git\telegram-bot\api
+  npx sequelize-cli db:migrate
+
+  Paso 7: (Opcional) Eliminar Usuarios Viejos
+
+  -- Si ya tenías usuarios con doble hash:
+  TRUNCATE user_credentials;
+  TRUNCATE user_activation_tokens;
+  TRUNCATE users;
+
+  Paso 8: Arrancar Servidor
+
+  cd E:\susan\git\telegram-bot\api
+  npm run dev
+
+  Paso 9: Verificar Salud
+
+  # En otra terminal:
+  curl http://localhost:8080/api/auth/user/check-signin
+  # Debe responder con JSON (aunque sea error 401)
+
+  ---
+  🚨 ERRORES QUE PODRÍAS VER Y CÓMO RESOLVERLOS
+
+  Error: "Cannot find module 'connect-redis'"
+
+  Solución: npm install
+
+  Error: "ECONNREFUSED ::1:6379"
+
+  Solución: Redis no está corriendo → redis-server
+
+  Error: "Config file not found"
+
+  Solución: Crear api/src/config/config.json
+
+  Error: "ER_ACCESS_DENIED_ERROR"
+
+  Solución: Credenciales incorrectas en .env o config.json
+
+  Error: "Table 'users' doesn't exist"
+
+  Solución: Ejecutar migraciones → npx sequelize-cli db:migrate
+
+  Error al hacer login: "Correo o contraseña inválidos"
+
+  Si estás seguro de la password: Usuario tiene doble hash → eliminar y crear de nuevo
+
+  ---
+  💡 MI RECOMENDACIÓN
+
+  Para evitar problemas, hazlo en este orden exacto:
+
+  # 1. Instalar dependencias
+  cd E:\susan\git\telegram-bot\api
+  npm install
+
+  # 2. Configurar archivos
+  copy .env.example .env
+  copy src\config\config-example.json src\config\config.json
+  # Editar ambos archivos con tus valores
+
+  # 3. Arrancar Redis (en WSL o Memurai)
+  redis-server
+
+  # 4. Crear base de datos
+  mysql -u root -p -e "CREATE DATABASE IF NOT EXISTS \`telegram-bot\`;"
+
+  # 5. Ejecutar migraciones
+  npx sequelize-cli db:migrate
+
+  # 6. Arrancar app
+  npm run dev
+
+
+🏗️ ARQUITECTURA COMPLETA DE USUARIOS - GUÍA DEFINITIVA
+
+  Te explico TODO sobre tu sistema de usuarios. Esto es CRÍTICO que lo entiendas bien.    
+
+  ---
+  📊 TIENES 3 TIPOS DE USUARIOS (No 2)
+
+  Tu sistema tiene 3 tipos de usuarios diferentes, cada uno con su propósito:
+
+  1. USERS (Administradores del CMS)
+
+  - Quiénes son: Staff interno, administradores del sistema
+  - Qué hacen: Gestionar eventos, usuarios, contenido, ver reportes
+  - Frontend: client/admin/front-admin/
+  - Acceso: Panel de administración
+
+  2. CUSTOMERS (Clientes públicos)
+
+  - Quiénes son: Usuarios finales, público general
+  - Qué hacen: Ver eventos, comprar entradas, chatear con bot
+  - Frontend: client/customer/
+  - Acceso: Web pública
+
+  3. PROMOTERS (Promotores de eventos)
+
+  - Quiénes son: Empresas/personas que organizan eventos
+  - Qué hacen: Crear y gestionar sus propios eventos
+  - Frontend: ⚠️ NO IMPLEMENTADO AÚN
+  - Acceso: Futuro panel de promotores
+
+  ---
+  🗄️ ESTRUCTURA DE BASE DE DATOS
+
+  Tablas por Tipo de Usuario
+
+  ┌─────────────────────────────────────────────────────────┐
+  │                    USERS (Admins)                       │
+  ├─────────────────────────────────────────────────────────┤
+  │ users                    - Datos básicos (id, name, email)
+  │ user_credentials         - Password hasheado
+  │ user_activation_tokens   - Tokens de activación email
+  │ user_reset_password_tokens - Tokens reseteo contraseña
+  └─────────────────────────────────────────────────────────┘
+
+  ┌─────────────────────────────────────────────────────────┐
+  │                 CUSTOMERS (Público)                     │
+  ├─────────────────────────────────────────────────────────┤
+  │ customers                - Datos básicos (id, name, email)
+  │ customer_credentials     - Password hasheado
+  │ customer_activation_tokens - Tokens de activación email
+  │ customer_reset_password_tokens - Tokens reseteo contraseña
+  │ customer_events          - Eventos que han comprado/asistido
+  └─────────────────────────────────────────────────────────┘
+
+  ┌─────────────────────────────────────────────────────────┐
+  │               PROMOTERS (Organizadores)                 │
+  ├─────────────────────────────────────────────────────────┤
+  │ promoters                - Datos básicos (id, name, email)
+  │ promoter_credentials     - Password hasheado
+  │ promoter_activation_tokens - Tokens de activación email
+  │ promoter_spots           - Spots/lugares que gestionan
+  └─────────────────────────────────────────────────────────┘
+
+  ---
+  🔐 SISTEMAS DE AUTENTICACIÓN (3 Independientes)
+
+  Cada tipo de usuario tiene su propio sistema de autenticación COMPLETO:
+
+  Sistema 1: Autenticación de USERS (Admins)
+
+  // REGISTRO
+  POST /api/auth/register
+  Body: { name, email, password }
+  → Crea user en tabla 'users'
+  → Crea credentials en 'user_credentials' con password hasheado
+  → Crea token en 'user_activation_tokens'
+  → Envía email de activación
+
+  // ACTIVACIÓN
+  GET /api/auth/activate/:token
+  → Marca token como usado
+  → Usuario puede hacer login
+
+  // LOGIN
+  POST /api/auth/login
+  Body: { email, password }
+  → Busca en 'user_credentials'
+  → Verifica password con bcrypt
+  → Crea sesión en Redis
+  → Devuelve JWT token
+  → Payload: { userId, email, name }
+
+  // PROTECCIÓN RUTAS
+  Middleware: verifyToken()
+  → Valida JWT
+  → Extrae userId del token
+  → Inyecta req.user
+
+  Frontend: client/admin/front-admin/
+  Rutas protegidas: /admin/* (excepto login/register)
+
+  ---
+  Sistema 2: Autenticación de CUSTOMERS (Público)
+
+  // REGISTRO
+  POST /api/auth/customer/register
+  Body: { name, email, password }
+  → Crea customer en tabla 'customers'
+  → Crea credentials en 'customer_credentials' con password hasheado
+  → Crea token en 'customer_activation_tokens'
+  → Envía email de activación
+
+  // ACTIVACIÓN
+  GET /api/auth/customer/activate/:token
+  → Marca token como usado
+  → Customer puede hacer login
+
+  // LOGIN
+  POST /api/auth/customer/login
+  Body: { email, password }
+  → Busca en 'customer_credentials'
+  → Verifica password con bcrypt
+  → Devuelve JWT token
+  → Payload: { customerId, email, name }
+
+  // PROTECCIÓN RUTAS
+  Middleware: verifyCustomerToken()
+  → Valida JWT
+  → Extrae customerId del token
+  → Inyecta req.customer
+
+  Frontend: client/customer/
+  Rutas protegidas: /profile, /invoices
+
+  ---
+  Sistema 3: Autenticación de PROMOTERS (Futuro)
+
+  // ⚠️ BACKEND EXISTE, FRONTEND NO
+
+  // REGISTRO
+  ⚠️ No hay endpoint público aún
+  → Los admins crean promoters desde el panel
+
+  // LOGIN
+  ⚠️ No implementado aún
+
+  // PROTECCIÓN RUTAS
+  ⚠️ No hay middleware específico aún
+
+  Frontend: ❌ NO EXISTE
+  Estado: Solo existe estructura de base de datos
+
+  ---
+  🌐 FRONTENDS Y RUTAS
+
+  Frontend 1: Admin Panel
+
+  Ubicación: client/admin/front-admin/
+  Tecnología: Web Components + Redux
+  Build: Vite
+
+  Rutas públicas:
+  - /admin/login - Login de admins
+  - /admin/register - Registro de admins
+  - /admin/forgot-password - Recuperar contraseña
+
+  Rutas protegidas (requieren login):
+  - /admin/usuarios - Gestión de usuarios
+  - /admin/eventos - Gestión de eventos
+  - /admin/categorias - Gestión de categorías
+  - /admin/promotores - Gestión de promotores
+  - /admin/faqs - Gestión de FAQs
+  - /admin/heroes - Gestión de heroes
+
+  Protección:
+  // page.js verifica autenticación
+  if (protectedRoute && !isAuthenticated()) {
+    window.location.href = '/admin/login'
+  }
+
+  ---
+  Frontend 2: Cliente Público
+
+  Ubicación: client/customer/
+  Tecnología: Web Components (sin Redux)
+  Build: Vite
+
+  Rutas públicas:
+  - / - Home
+  - /login - Login de customers
+  - /register - Registro de customers
+  - /forgot-password - Recuperar contraseña
+
+  Rutas protegidas (requieren login):
+  - /profile - Perfil del customer
+  - /invoices - Facturas del customer
+
+  Protección:
+  // page.js verifica autenticación
+  const protectedRoutes = {
+    '/profile': 'profile.html',
+    '/invoices': 'invoices.html'
+  }
+
+  if (protectedRoutes[path] && !isAuthenticated()) {
+    window.location.href = '/login'
+  }
+
+  ---
+  Frontend 3: Panel Promotores
+
+  Ubicación: ❌ NO EXISTE
+  Estado: Solo existe backend (tablas, modelos)
+
+  ---
+  🔑 DIFERENCIAS CLAVE ENTRE SISTEMAS
+
+  Users vs Customers vs Promoters
+  Aspecto: Tabla principal
+  USERS (Admin): users
+  CUSTOMERS (Público): customers
+  PROMOTERS: promoters
+  ────────────────────────────────────────
+  Aspecto: Tabla credentials
+  USERS (Admin): user_credentials
+  CUSTOMERS (Público): customer_credentials
+  PROMOTERS: promoter_credentials
+  ────────────────────────────────────────
+  Aspecto: Endpoint login
+  USERS (Admin): /api/auth/login
+  CUSTOMERS (Público): /api/auth/customer/login
+  PROMOTERS: ❌ No existe
+  ────────────────────────────────────────
+  Aspecto: Middleware
+  USERS (Admin): verifyToken()
+  CUSTOMERS (Público): verifyCustomerToken()
+  PROMOTERS: ❌ No existe
+  ────────────────────────────────────────
+  Aspecto: JWT payload
+  USERS (Admin): { userId, email, name }
+  CUSTOMERS (Público): { customerId, email, name }
+  PROMOTERS: ❌ No existe
+  ────────────────────────────────────────
+  Aspecto: Frontend
+  USERS (Admin): /admin/*
+  CUSTOMERS (Público): /customer/*
+  PROMOTERS: ❌ No existe
+  ────────────────────────────────────────
+  Aspecto: Sesión Redis
+  USERS (Admin): ✅ Sí (checkSignin)
+  CUSTOMERS (Público): ❌ No
+  PROMOTERS: ❌ No
+  ────────────────────────────────────────
+  Aspecto: Puede gestionar
+  USERS (Admin): TODO el sistema
+  CUSTOMERS (Público): Solo su perfil
+  PROMOTERS: Sus eventos/spots
+  ---
+  🔄 FLUJOS COMPLETOS
+
+  Flujo 1: Admin se registra y hace login
+
+  1. Admin entra a /admin/register
+  2. Completa formulario (name, email, password)
+  3. POST /api/auth/register
+     ├─ Crea registro en 'users' (id: 1, name: "Juan", email: "juan@admin.com")
+     ├─ Crea registro en 'user_credentials' (userId: 1, email, password_hash)
+     ├─ Crea registro en 'user_activation_tokens' (userId: 1, token: "abc123...")
+     └─ Envía email a juan@admin.com con link: /api/auth/activate/abc123
+  4. Juan abre email y hace click en link
+  5. GET /api/auth/activate/abc123
+     └─ Marca token como usado (used: true)
+  6. Juan entra a /admin/login
+  7. Ingresa email y password
+  8. POST /api/auth/login
+     ├─ Busca en 'user_credentials' WHERE email = "juan@admin.com"
+     ├─ Verifica que activation_token.used = true
+     ├─ Compara password con bcrypt.compare()
+     ├─ Genera JWT: { userId: 1, email, name }
+     ├─ Crea sesión en Redis: req.session.userId = 1
+     └─ Devuelve { token, user: {...} }
+  9. Frontend guarda token en localStorage
+  10. Redirige a /admin/usuarios
+  11. Cada request incluye: Authorization: Bearer <token>
+
+  ---
+  Flujo 2: Customer se registra y hace login
+
+  1. Customer entra a /register
+  2. Completa formulario (name, email, password)
+  3. POST /api/auth/customer/register
+     ├─ Crea registro en 'customers' (id: 1, name: "María", email: "maria@gmail.com")     
+     ├─ Crea registro en 'customer_credentials' (customerId: 1, email, password_hash)     
+     ├─ Crea registro en 'customer_activation_tokens' (customerId: 1, token: "xyz789...") 
+     └─ Envía email a maria@gmail.com con link: /api/auth/customer/activate/xyz789        
+  4. María abre email y hace click en link
+  5. GET /api/auth/customer/activate/xyz789
+     └─ Marca token como usado (used: true)
+  6. María entra a /login
+  7. Ingresa email y password
+  8. POST /api/auth/customer/login
+     ├─ Busca en 'customer_credentials' WHERE email = "maria@gmail.com"
+     ├─ Verifica que activation_token.used = true
+     ├─ Compara password con bcrypt.compare()
+     ├─ Genera JWT: { customerId: 1, email, name }
+     └─ Devuelve { token, user: {...} }
+  9. Frontend guarda token en localStorage
+  10. Redirige a /profile
+  11. Cada request incluye: Authorization: Bearer <token>
+
+  ---
+  🚨 COSAS CRÍTICAS QUE DEBES SABER
+
+  1. Los sistemas NO se cruzan
+
+  // ❌ ESTO NO FUNCIONA:
+  // Customer intenta acceder a ruta de admin
+  POST /api/admin/events
+  Headers: Authorization: Bearer <customer-token>
+  → FALLA: verifyToken() espera userId, pero token tiene customerId
+
+  // ✅ ESTO SÍ FUNCIONA:
+  // Customer accede a su ruta
+  GET /api/auth/customer/me
+  Headers: Authorization: Bearer <customer-token>
+  → OK: verifyCustomerToken() extrae customerId correctamente
+
+  2. Emails pueden repetirse entre sistemas
+
+  // ✅ ESTO ES VÁLIDO:
+  users.email = "juan@example.com"
+  customers.email = "juan@example.com"
+  promoters.email = "juan@example.com"
+
+  // Son 3 personas diferentes o la misma persona con 3 roles
+  // Las tablas son independientes
+
+  3. Sesiones Redis solo para Admins
+
+  // ✅ Users tienen sesión
+  POST /api/auth/login
+  → req.session.userId = 1
+  → Cookie: connect.sid=xxx
+
+  // ❌ Customers NO tienen sesión
+  POST /api/auth/customer/login
+  → Solo devuelve JWT
+  → No hay sesión en Redis
+
+  // ¿Por qué?
+  // Users: checkSignin() verifica sesión al entrar a /admin/login
+  // Customers: Sistema más simple, solo JWT
+
+  4. Promoters está incompleto
+
+  // ✅ Existe en base de datos
+  promoters
+  promoter_credentials
+  promoter_activation_tokens
+  promoter_spots
+
+  // ❌ NO existe:
+  - Frontend para promoters
+  - Endpoint de login público
+  - Middleware verifyPromoterToken
+  - Rutas protegidas /promoter/*
+
+  // Estado: Solo admins pueden crear promoters desde el panel
+
+  ---
+  📝 EJEMPLO PRÁCTICO: ¿Quién puede hacer qué?
+
+  Admin (User)
+
+  // ✅ Puede:
+  - Crear/editar/eliminar eventos
+  - Crear/editar/eliminar usuarios
+  - Crear/editar/eliminar customers
+  - Crear/editar/eliminar promoters
+  - Gestionar TODO el sistema
+  - Ver analytics y reportes
+
+  // ❌ NO puede:
+  - Comprar entradas como customer
+  - Aparecer como promoter de un evento
+
+  Customer
+
+  // ✅ Puede:
+  - Ver eventos públicos
+  - Comprar entradas (futura funcionalidad)
+  - Ver su perfil
+  - Ver sus facturas
+  - Chatear con el bot
+
+  // ❌ NO puede:
+  - Acceder al panel admin
+  - Crear eventos
+  - Ver otros customers
+  - Gestionar promoters
+
+  Promoter
+
+  // ✅ DEBERÍA poder (futuro):
+  - Crear sus propios eventos
+  - Gestionar sus spots
+  - Ver estadísticas de sus eventos
+  - Editar sus eventos
+
+  // ❌ NO debería poder:
+  - Acceder al panel admin completo
+  - Ver/editar eventos de otros promoters
+  - Gestionar usuarios del sistema
+
+  ---
+  🎯 RESUMEN EJECUTIVO
+
+  Tu sistema tiene 3 capas de usuarios completamente independientes:
+
+  1. ADMINS (Users)
+    - ✅ Completamente implementado
+    - Frontend: /admin/*
+    - Auth completa + sesiones Redis
+  2. CLIENTES (Customers)
+    - ✅ Completamente implementado
+    - Frontend: /customer/* y rutas públicas
+    - Auth completa solo con JWT
+  3. PROMOTORES (Promoters)
+    - ⚠️ Solo backend/base de datos
+    - ❌ Sin frontend propio
+    - ❌ Sin login público
+    - Los crea el admin manualmente
+
+  Cada sistema:
+  - Tiene sus propias tablas
+  - Su propio sistema de auth
+  - Sus propios endpoints
+  - Su propio middleware
+  - Su propio JWT payload
+
+  NO se cruzan: Un token de customer NO sirve para rutas de admin, y viceversa.
