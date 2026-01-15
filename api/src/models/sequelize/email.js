@@ -1,20 +1,47 @@
 'use strict'
 const { Model } = require('sequelize')
 module.exports = (sequelize, DataTypes) => {
-  class Email extends Model {
+  class SentEmail extends Model {
     static associate (models) {
       // associations can be defined here
     }
   }
-  Email.init({
-    subject: DataTypes.STRING,
-    path: DataTypes.STRING,
+  SentEmail.init({
+    userId: {
+      type: DataTypes.INTEGER,
+      allowNull: false
+    },
+    userType: {
+      type: DataTypes.STRING,
+      allowNull: false
+    },
+    sendAt: {
+      type: DataTypes.DATE,
+      allowNull: false
+    },
+    emailTemplate: {
+      type: DataTypes.STRING,
+      allowNull: false
+    },
+    readed: {
+      type: DataTypes.BOOLEAN,
+      defaultValue: false
+    },
+    readedAt: {
+      type: DataTypes.DATE,
+      allowNull: true
+    },
+    uuid: {
+      type: DataTypes.STRING,
+      allowNull: false,
+      unique: true
+    },
     deletedAt: DataTypes.DATE
   }, {
     sequelize,
-    modelName: 'Email',
+    modelName: 'SentEmail',
     paranoid: true,
     tableName: 'emails'
   })
-  return Email
+  return SentEmail
 }

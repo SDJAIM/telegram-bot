@@ -28,8 +28,9 @@ module.exports = (sequelize, DataTypes) => {
   }, {
     sequelize,
     modelName: 'EventPrice',
+    tableName: 'event_prices',
     paranoid: true,
-    underscored: true,
+    underscored: true
   })
   return EventPrice
 }

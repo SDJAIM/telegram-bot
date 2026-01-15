@@ -4,10 +4,10 @@ const crypto = require('crypto')
 const sequelizeDb = require('../../models/sequelize')
 const EmailService = require('../../services/email-service')
 
-const User = sequelizeDb.User
-const UserCredential = sequelizeDb.UserCredential
-const UserActivationToken = sequelizeDb.UserActivationToken
-const UserResetPasswordToken = sequelizeDb.UserResetPasswordToken
+const Customer = sequelizeDb.Customer
+const CustomerCredential = sequelizeDb.CustomerCredential
+const CustomerActivationToken = sequelizeDb.CustomerActivationToken
+const CustomerResetPasswordToken = sequelizeDb.CustomerResetPasswordToken
 
 const SALT_ROUNDS = 10
 const JWT_EXPIRATION = '24h'
@@ -34,7 +34,7 @@ exports.register = async (req, res, next) => {
       throw err
     }
 
-    const existingCredential = await UserCredential.findOne({
+    const existingCredential = await CustomerCredential.findOne({
       where: { email },
       transaction
     })
@@ -45,11 +45,11 @@ exports.register = async (req, res, next) => {
       throw err
     }
 
-    const user = await User.create({ name, email }, { transaction })
+    const customer = await Customer.create({ name, email }, { transaction })
 
     // El password se hasheará automáticamente por el hook beforeCreate del modelo
-    await UserCredential.create({
-      userId: user.id,
+    await CustomerCredential.create({
+      customerId: customer.id,
       email,
       password,
       lastPasswordChange: new Date()
@@ -59,10 +59,10 @@ exports.register = async (req, res, next) => {
     const expirationDate = new Date()
     expirationDate.setHours(expirationDate.getHours() + ACTIVATION_TOKEN_EXPIRATION_HOURS)
 
-    await UserActivationToken.create({
-      userId: user.id,
+    await CustomerActivationToken.create({
+      customerId: customer.id,
       token: activationToken,
-      expirationDate,
+      expiresAt: expirationDate,
       used: false
     }, { transaction })
 
@@ -71,10 +71,10 @@ exports.register = async (req, res, next) => {
     try {
       const emailService = new EmailService(process.env.EMAIL_TYPE || 'smtp')
       emailService.sendEmail(
-        { id: user.id, email: user.email, language: 'es' },
-        'user',
+        { id: customer.id, email: customer.email, language: 'es' },
+        'customer',
         'activationUrl',
-        { activationToken, userName: user.name }
+        { activationToken, userName: customer.name }
       )
     } catch (emailErr) {
       console.error('Error enviando email de activacion:', emailErr)
@@ -82,7 +82,7 @@ exports.register = async (req, res, next) => {
 
     res.status(201).json({
       message: 'Usuario registrado correctamente. Revisa tu email para activar la cuenta.',
-      userId: user.id
+      customerId: customer.id
     })
   } catch (err) {
     await transaction.rollback()
@@ -100,9 +100,9 @@ exports.activate = async (req, res, next) => {
   try {
     const { token } = req.params
 
-    const activationToken = await UserActivationToken.findOne({
+    const activationToken = await CustomerActivationToken.findOne({
       where: { token, used: false },
-      include: [{ model: User, as: 'user' }]
+      include: [{ model: Customer, as: 'customer' }]
     })
 
     if (!activationToken) {
@@ -111,7 +111,7 @@ exports.activate = async (req, res, next) => {
       throw err
     }
 
-    if (new Date() > activationToken.expirationDate) {
+    if (new Date() > activationToken.expiresAt) {
       const err = new Error('El token de activación ha expirado')
       err.statusCode = 400
       throw err
@@ -137,9 +137,9 @@ exports.login = async (req, res, next) => {
       throw err
     }
 
-    const credential = await UserCredential.findOne({
+    const credential = await CustomerCredential.findOne({
       where: { email },
-      include: [{ model: User, as: 'user' }]
+      include: [{ model: Customer, as: 'customer' }]
     })
 
     // No revelar si el email existe o no
@@ -149,8 +149,8 @@ exports.login = async (req, res, next) => {
       throw err
     }
 
-    const hasActiveToken = await UserActivationToken.findOne({
-      where: { userId: credential.userId, used: true }
+    const hasActiveToken = await CustomerActivationToken.findOne({
+      where: { customerId: credential.customerId, used: true }
     })
 
     // No revelar que la cuenta existe pero no está activada (seguridad)
@@ -169,27 +169,23 @@ exports.login = async (req, res, next) => {
     }
 
     const tokenPayload = {
-      userId: credential.user.id,
+      customerId: credential.customer.id,
       email: credential.email,
-      name: credential.user.name
+      name: credential.customer.name
     }
 
     const accessToken = jwt.sign(tokenPayload, process.env.JWT_SECRET, {
       expiresIn: JWT_EXPIRATION
     })
 
-    // Crear sesión para el usuario
-    req.session.userId = credential.user.id
-    req.session.email = credential.email
-    req.session.name = credential.user.name
-
     res.status(200).json({
       message: 'Login exitoso',
       token: accessToken,
       user: {
-        id: credential.user.id,
-        name: credential.user.name,
-        email: credential.email
+        id: credential.customer.id,
+        name: credential.customer.name,
+        email: credential.email,
+        createdAt: credential.customer.createdAt
       }
     })
   } catch (err) {
@@ -207,9 +203,9 @@ exports.forgotPassword = async (req, res, next) => {
       throw err
     }
 
-    const credential = await UserCredential.findOne({
+    const credential = await CustomerCredential.findOne({
       where: { email },
-      include: [{ model: User, as: 'user' }]
+      include: [{ model: Customer, as: 'customer' }]
     })
 
     if (!credential) {
@@ -222,20 +218,20 @@ exports.forgotPassword = async (req, res, next) => {
     const expirationDate = new Date()
     expirationDate.setHours(expirationDate.getHours() + RESET_TOKEN_EXPIRATION_HOURS)
 
-    await UserResetPasswordToken.create({
-      userId: credential.userId,
+    await CustomerResetPasswordToken.create({
+      customerId: credential.customerId,
       token: resetToken,
-      expirationDate,
+      expiresAt: expirationDate,
       used: false
     })
 
     try {
       const emailService = new EmailService(process.env.EMAIL_TYPE || 'smtp')
       emailService.sendEmail(
-        { id: credential.user.id, email: credential.email, language: 'es' },
-        'user',
+        { id: credential.customer.id, email: credential.email, language: 'es' },
+        'customer',
         'resetPassword',
-        { resetToken, userName: credential.user.name }
+        { resetToken, userName: credential.customer.name }
       )
     } catch (emailErr) {
       console.error('Error enviando email de reset:', emailErr)
@@ -266,7 +262,7 @@ exports.resetPassword = async (req, res, next) => {
       throw err
     }
 
-    const resetToken = await UserResetPasswordToken.findOne({
+    const resetToken = await CustomerResetPasswordToken.findOne({
       where: { token, used: false }
     })
 
@@ -276,7 +272,7 @@ exports.resetPassword = async (req, res, next) => {
       throw err
     }
 
-    if (new Date() > resetToken.expirationDate) {
+    if (new Date() > resetToken.expiresAt) {
       const err = new Error('El token ha expirado')
       err.statusCode = 400
       throw err
@@ -284,9 +280,9 @@ exports.resetPassword = async (req, res, next) => {
 
     const hashedPassword = await bcrypt.hash(password, SALT_ROUNDS)
 
-    await UserCredential.update(
+    await CustomerCredential.update(
       { password: hashedPassword, lastPasswordChange: new Date() },
-      { where: { userId: resetToken.userId } }
+      { where: { customerId: resetToken.customerId } }
     )
 
     await resetToken.update({ used: true })
@@ -301,29 +297,17 @@ exports.resetPassword = async (req, res, next) => {
 
 exports.me = async (req, res, next) => {
   try {
-    res.status(200).json({
-      user: req.user
+    const customer = await Customer.findByPk(req.customer.id, {
+      attributes: ['id', 'name', 'email', 'createdAt']
     })
-  } catch (err) {
-    next(err)
-  }
-}
 
-exports.checkSignin = async (req, res, next) => {
-  try {
-    // Verificar si hay una sesión activa
-    if (req.session && req.session.userId) {
-      // Usuario autenticado, devolver redirección
-      return res.status(200).json({
-        authenticated: true,
-        redirection: '/admin/usuarios'
-      })
+    if (!customer) {
+      const err = new Error('Usuario no encontrado')
+      err.statusCode = 404
+      throw err
     }
 
-    // No hay sesión activa
-    res.status(401).json({
-      authenticated: false
-    })
+    res.status(200).json(customer)
   } catch (err) {
     next(err)
   }

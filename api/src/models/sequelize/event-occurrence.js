@@ -29,6 +29,7 @@ module.exports = (sequelize, DataTypes) => {
   }, {
     sequelize,
     modelName: 'EventOccurrence',
+    tableName: 'event_occurrences',
     paranoid: true
   })
   return EventOccurrence

@@ -2,7 +2,7 @@
 
 module.exports = {
   async up (queryInterface, Sequelize) {
-    await queryInterface.createTable('USER_RESET_PASSWORD_TOKENS', {
+    await queryInterface.createTable('user_reset_password_tokens', {
       id: {
         type: Sequelize.INTEGER,
         primaryKey: true,
@@ -12,7 +12,7 @@ module.exports = {
         type: Sequelize.INTEGER,
         allowNull: false,
         references: {
-          model: 'USERS',
+          model: 'users',
           key: 'id'
         }
       },
@@ -40,6 +40,6 @@ module.exports = {
   },
 
   async down (queryInterface, Sequelize) {
-    await queryInterface.dropTable('USER_RESET_PASSWORD_TOKENS')
+    await queryInterface.dropTable('user_reset_password_tokens')
   }
 }

@@ -14,21 +14,51 @@ class PageComponent extends HTMLElement {
     this.render()
   }
 
+  isAuthenticated () {
+    return !!localStorage.getItem('token')
+  }
+
   render () {
     const path = window.location.pathname
     this.getTemplate(path)
   }
 
   async getTemplate (path) {
-    const routes = {
-      '/': 'home.html'
+    const publicRoutes = {
+      '/': 'home.html',
+      '/login': 'login.html',
+      '/register': 'register.html',
+      '/forgot-password': 'forgot-password.html'
     }
-    // es un objeto '/' que dice 'si path es igual a /, entonces carga home.html' si no existe, carga 404.html. entonces se lo paso a una funcion que
-    // se encarga de cargar la pagina.
 
-    const filename = routes[path] || '404.html'
+    const protectedRoutes = {
+      '/profile': 'profile.html',
+      '/invoices': 'invoices.html'
+    }
 
-    await this.loadPage(filename)
+    // Check if it's a protected route
+    if (protectedRoutes[path]) {
+      if (!this.isAuthenticated()) {
+        window.location.href = '/login'
+        return
+      }
+      await this.loadPage(protectedRoutes[path])
+      return
+    }
+
+    // Check if it's a public route
+    if (publicRoutes[path]) {
+      // Redirect to profile if already authenticated and trying to access login/register
+      if (this.isAuthenticated() && (path === '/login' || path === '/register')) {
+        window.location.href = '/profile'
+        return
+      }
+      await this.loadPage(publicRoutes[path])
+      return
+    }
+
+    // Default to 404
+    await this.loadPage('404.html')
   }
 
   async loadPage (filename) {

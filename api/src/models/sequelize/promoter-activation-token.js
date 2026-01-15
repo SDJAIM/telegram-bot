@@ -22,7 +22,7 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.INTEGER,
       allowNull: false,
       references: {
-        model: 'PROMOTERS',
+        model: 'promoters',
         key: 'id'
       }
     },
@@ -43,7 +43,7 @@ module.exports = (sequelize, DataTypes) => {
   }, {
     sequelize,
     modelName: 'PromoterActivationToken',
-    tableName: 'PROMOTER_ACTIVATION_TOKENS',
+    tableName: 'promoter_activation_tokens',
     paranoid: true,
     timestamps: true
   })

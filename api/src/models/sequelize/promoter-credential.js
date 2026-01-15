@@ -21,7 +21,7 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.INTEGER,
       allowNull: false,
       references: {
-        model: 'PROMOTERS',
+        model: 'promoters',
         key: 'id'
       }
     },
@@ -56,7 +56,7 @@ module.exports = (sequelize, DataTypes) => {
   }, {
     sequelize,
     modelName: 'PromoterCredential',
-    tableName: 'PROMOTER_CREDENTIALS',
+    tableName: 'promoter_credentials',
     paranoid: true
   })
 

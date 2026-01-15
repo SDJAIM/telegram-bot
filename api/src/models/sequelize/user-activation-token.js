@@ -15,7 +15,7 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.INTEGER,
       allowNull: false,
       references: {
-        model: 'Users',
+        model: 'users',
         key: 'id'
       }
     },
@@ -39,7 +39,7 @@ module.exports = (sequelize, DataTypes) => {
     sequelize,
     modelName: 'UserActivationToken',
     paranoid: true,
-    tableName: 'UserActivationTokens'
+    tableName: 'user_activation_tokens'
   })
 
   return UserActivationToken

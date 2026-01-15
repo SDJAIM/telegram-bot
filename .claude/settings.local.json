@@ -1,0 +1,14 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(tree:*)",
+      "Bash(cat:*)",
+      "Bash(ls:*)",
+      "Bash(npm run dev:*)",
+      "Bash(npm run proxy:*)",
+      "Bash(npm install:*)",
+      "Bash(sort:*)",
+      "Bash(grep \"createTable\\(\" \"E:\\\\susan\\\\git\\\\telegram-bot\\\\api\\\\src\\\\migrations\"\"*.js | grep -i \"Towns|Events|Spots|PROMOTER|USER_|UserAct \")"
+    ]
+  }
+}

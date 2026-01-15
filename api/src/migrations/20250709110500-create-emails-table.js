@@ -8,11 +8,34 @@ module.exports = {
         primaryKey: true,
         type: Sequelize.INTEGER
       },
-      subject: {
-        type: Sequelize.STRING
+      userId: {
+        type: Sequelize.INTEGER,
+        allowNull: false
       },
-      path: {
-        type: Sequelize.STRING
+      userType: {
+        type: Sequelize.STRING,
+        allowNull: false
+      },
+      sendAt: {
+        type: Sequelize.DATE,
+        allowNull: false
+      },
+      emailTemplate: {
+        type: Sequelize.STRING,
+        allowNull: false
+      },
+      readed: {
+        type: Sequelize.BOOLEAN,
+        defaultValue: false
+      },
+      readedAt: {
+        type: Sequelize.DATE,
+        allowNull: true
+      },
+      uuid: {
+        type: Sequelize.STRING,
+        allowNull: false,
+        unique: true
       },
       createdAt: {
         allowNull: false,

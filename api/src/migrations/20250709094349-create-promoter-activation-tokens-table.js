@@ -2,7 +2,7 @@
 
 module.exports = {
   async up (queryInterface, Sequelize) {
-    await queryInterface.createTable('PROMOTER_ACTIVATION_TOKENS', {
+    await queryInterface.createTable('promoter_activation_tokens', {
       id: {
         type: Sequelize.INTEGER,
         primaryKey: true,
@@ -12,7 +12,7 @@ module.exports = {
         type: Sequelize.INTEGER,
         allowNull: false,
         references: {
-          model: 'PROMOTERS',
+          model: 'promoters',
           key: 'id'
         }
       },
@@ -46,6 +46,6 @@ module.exports = {
   },
 
   async down (queryInterface, Sequelize) {
-    await queryInterface.dropTable('PROMOTER_ACTIVATION_TOKENS')
+    await queryInterface.dropTable('promoter_activation_tokens')
   }
 }

@@ -1,32 +1,11 @@
-class RegisterForm extends HTMLElement {
+class CustomerRegisterComponent extends HTMLElement {
   constructor () {
     super()
     this.shadow = this.attachShadow({ mode: 'open' })
   }
 
-  async connectedCallback () {
-    await this.checkSignin()
+  connectedCallback () {
     this.render()
-  }
-
-  async checkSignin () {
-    try {
-      const response = await fetch('/api/auth/user/check-signin', {
-        method: 'GET',
-        credentials: 'include',
-        headers: {
-          'Content-Type': 'application/json'
-        }
-      })
-
-      if (response.ok) {
-        const data = await response.json()
-        window.location.href = data.redirection
-      }
-    } catch (error) {
-      // Usuario no autenticado, continuar mostrando register
-      console.log('No hay sesión activa')
-    }
   }
 
   render () {
@@ -62,14 +41,14 @@ class RegisterForm extends HTMLElement {
         }
 
         .register-header h1 {
-          font-family: "Roboto", sans-serif;
+          font-family: "Nunito Sans", sans-serif;
           font-size: 1.75rem;
           color: #333;
           margin-bottom: 0.5rem;
         }
 
         .register-header p {
-          font-family: "Roboto", sans-serif;
+          font-family: "Nunito Sans", sans-serif;
           color: #666;
           font-size: 0.9rem;
         }
@@ -80,7 +59,7 @@ class RegisterForm extends HTMLElement {
 
         .form-group label {
           display: block;
-          font-family: "Roboto", sans-serif;
+          font-family: "Nunito Sans", sans-serif;
           font-size: 0.875rem;
           color: #374151;
           font-weight: 500;
@@ -92,7 +71,7 @@ class RegisterForm extends HTMLElement {
           padding: 0.75rem 1rem;
           border: 1px solid #e5e7eb;
           border-radius: 8px;
-          font-family: "Roboto", sans-serif;
+          font-family: "Nunito Sans", sans-serif;
           font-size: 1rem;
           transition: all 0.2s ease;
           outline: none;
@@ -109,7 +88,7 @@ class RegisterForm extends HTMLElement {
 
         .message {
           border-radius: 6px;
-          font-family: "Roboto", sans-serif;
+          font-family: "Nunito Sans", sans-serif;
           font-size: 0.875rem;
           padding: 0.75rem;
           margin-bottom: 1rem;
@@ -139,7 +118,7 @@ class RegisterForm extends HTMLElement {
           color: #ffffff;
           border: none;
           border-radius: 8px;
-          font-family: "Roboto", sans-serif;
+          font-family: "Nunito Sans", sans-serif;
           font-size: 1rem;
           font-weight: 600;
           cursor: pointer;
@@ -163,7 +142,7 @@ class RegisterForm extends HTMLElement {
         }
 
         .links a {
-          font-family: "Roboto", sans-serif;
+          font-family: "Nunito Sans", sans-serif;
           font-size: 0.875rem;
           color: #6366f1;
           text-decoration: none;
@@ -175,6 +154,25 @@ class RegisterForm extends HTMLElement {
           text-decoration: underline;
         }
 
+        .back-home {
+          text-align: center;
+          margin-bottom: 1rem;
+        }
+
+        .back-home a {
+          font-family: "Nunito Sans", sans-serif;
+          font-size: 0.875rem;
+          color: #6366f1;
+          text-decoration: none;
+          display: inline-flex;
+          align-items: center;
+          gap: 0.5rem;
+        }
+
+        .back-home a:hover {
+          text-decoration: underline;
+        }
+
         .password-requirements {
           margin-top: 0.5rem;
           padding: 0.5rem;
@@ -183,43 +181,22 @@ class RegisterForm extends HTMLElement {
         }
 
         .password-requirements small {
-          font-family: "Roboto", sans-serif;
+          font-family: "Nunito Sans", sans-serif;
           font-size: 0.75rem;
           color: #6b7280;
           display: block;
-        }
-
-        .message {
-          padding: 0.75rem;
-          border-radius: 6px;
-          font-family: "Roboto", sans-serif;
-          font-size: 0.875rem;
-          margin-bottom: 1rem;
-          display: none;
-        }
-
-        .message.active {
-          display: block;
-        }
-
-        .message.error {
-          background-color: #fef2f2;
-          border: 1px solid #fecaca;
-          color: #b91c1c;
-        }
-
-        .message.success {
-          background-color: #f0fdf4;
-          border: 1px solid #bbf7d0;
-          color: #166534;
         }
       </style>
 
       <div class="register-container">
         <div class="register-card">
+          <div class="back-home">
+            <a href="/">← Volver al inicio</a>
+          </div>
+
           <div class="register-header">
             <h1>Crear Cuenta</h1>
-            <p>Completa los datos para registrarte</p>
+            <p>Regístrate para acceder</p>
           </div>
 
           <div class="message"></div>
@@ -252,7 +229,7 @@ class RegisterForm extends HTMLElement {
           </form>
 
           <div class="links">
-            <a href="/admin/login">¿Ya tienes cuenta? Inicia sesión</a>
+            <a href="/login">¿Ya tienes cuenta? Inicia sesión</a>
           </div>
         </div>
       </div>
@@ -300,7 +277,7 @@ class RegisterForm extends HTMLElement {
       }
 
       try {
-        const response = await fetch('/api/auth/register', {
+        const response = await fetch('/api/auth/customer/register', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(data)
@@ -312,9 +289,14 @@ class RegisterForm extends HTMLElement {
           throw new Error(result.message || 'Error al registrar')
         }
 
-        message.textContent = result.message
+        message.textContent = '¡Registro exitoso! Por favor revisa tu email para activar tu cuenta.'
         message.classList.add('active', 'success')
         form.reset()
+
+        // Redirect to login after 3 seconds
+        setTimeout(() => {
+          window.location.href = '/login'
+        }, 3000)
       } catch (err) {
         message.textContent = err.message
         message.classList.add('active', 'error')
@@ -326,4 +308,4 @@ class RegisterForm extends HTMLElement {
   }
 }
 
-customElements.define('register-form-component', RegisterForm)
+customElements.define('customer-register-component', CustomerRegisterComponent)

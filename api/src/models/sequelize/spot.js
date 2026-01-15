@@ -36,8 +36,9 @@ module.exports = (sequelize, DataTypes) => {
   }, {
     sequelize,
     modelName: 'Spot',
+    tableName: 'spots',
     paranoid: true,
-    underscored: true,
+    underscored: true
   })
   return Spot
 }

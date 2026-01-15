@@ -52,8 +52,8 @@ module.exports = function (sequelize, DataTypes) {
             msg: 'Por favor, rellena el campo "Contraseña".'
           },
           len: {
-            args: [6, 255],
-            msg: 'La contraseña debe tener al menos 6 caracteres'
+            args: [8, 255],
+            msg: 'La contraseña debe tener al menos 8 caracteres'
           }
         }
       },

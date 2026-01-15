@@ -1,35 +1,11 @@
-import { store } from '../../redux/store.js'
-import { setUser } from '../../redux/auth-slice.js'
-
-class LoginForm extends HTMLElement {
+class CustomerLoginComponent extends HTMLElement {
   constructor () {
     super()
     this.shadow = this.attachShadow({ mode: 'open' })
   }
 
-  async connectedCallback () {
-    await this.checkSignin()
+  connectedCallback () {
     this.render()
-  }
-
-  async checkSignin () {
-    try {
-      const response = await fetch('/api/auth/user/check-signin', {
-        method: 'GET',
-        credentials: 'include',
-        headers: {
-          'Content-Type': 'application/json'
-        }
-      })
-
-      if (response.ok) {
-        const data = await response.json()
-        window.location.href = data.redirection
-      }
-    } catch (error) {
-      // Usuario no autenticado, continuar mostrando login
-      console.log('No hay sesión activa')
-    }
   }
 
   render () {
@@ -65,14 +41,14 @@ class LoginForm extends HTMLElement {
         }
 
         .login-header h1 {
-          font-family: "Roboto", sans-serif;
+          font-family: "Nunito Sans", sans-serif;
           font-size: 1.75rem;
           color: #333;
           margin-bottom: 0.5rem;
         }
 
         .login-header p {
-          font-family: "Roboto", sans-serif;
+          font-family: "Nunito Sans", sans-serif;
           color: #666;
           font-size: 0.9rem;
         }
@@ -83,7 +59,7 @@ class LoginForm extends HTMLElement {
 
         .form-group label {
           display: block;
-          font-family: "Roboto", sans-serif;
+          font-family: "Nunito Sans", sans-serif;
           font-size: 0.875rem;
           color: #374151;
           font-weight: 500;
@@ -95,7 +71,7 @@ class LoginForm extends HTMLElement {
           padding: 0.75rem 1rem;
           border: 1px solid #e5e7eb;
           border-radius: 8px;
-          font-family: "Roboto", sans-serif;
+          font-family: "Nunito Sans", sans-serif;
           font-size: 1rem;
           transition: all 0.2s ease;
           outline: none;
@@ -115,7 +91,7 @@ class LoginForm extends HTMLElement {
           border: 1px solid #fecaca;
           border-radius: 6px;
           color: #b91c1c;
-          font-family: "Roboto", sans-serif;
+          font-family: "Nunito Sans", sans-serif;
           font-size: 0.875rem;
           padding: 0.75rem;
           margin-bottom: 1rem;
@@ -133,7 +109,7 @@ class LoginForm extends HTMLElement {
           color: #ffffff;
           border: none;
           border-radius: 8px;
-          font-family: "Roboto", sans-serif;
+          font-family: "Nunito Sans", sans-serif;
           font-size: 1rem;
           font-weight: 600;
           cursor: pointer;
@@ -157,7 +133,7 @@ class LoginForm extends HTMLElement {
         }
 
         .links a {
-          font-family: "Roboto", sans-serif;
+          font-family: "Nunito Sans", sans-serif;
           font-size: 0.875rem;
           color: #6366f1;
           text-decoration: none;
@@ -173,13 +149,36 @@ class LoginForm extends HTMLElement {
           color: #9ca3af;
           margin: 0 0.5rem;
         }
+
+        .back-home {
+          text-align: center;
+          margin-bottom: 1rem;
+        }
+
+        .back-home a {
+          font-family: "Nunito Sans", sans-serif;
+          font-size: 0.875rem;
+          color: #6366f1;
+          text-decoration: none;
+          display: inline-flex;
+          align-items: center;
+          gap: 0.5rem;
+        }
+
+        .back-home a:hover {
+          text-decoration: underline;
+        }
       </style>
 
       <div class="login-container">
         <div class="login-card">
+          <div class="back-home">
+            <a href="/">← Volver al inicio</a>
+          </div>
+
           <div class="login-header">
             <h1>Iniciar Sesión</h1>
-            <p>Ingresa tus credenciales para acceder</p>
+            <p>Accede a tu cuenta</p>
           </div>
 
           <div class="error-message"></div>
@@ -199,9 +198,9 @@ class LoginForm extends HTMLElement {
           </form>
 
           <div class="links">
-            <a href="/admin/forgot-password">¿Olvidaste tu contraseña?</a>
+            <a href="/forgot-password">¿Olvidaste tu contraseña?</a>
             <span class="separator">|</span>
-            <a href="/admin/register">Crear cuenta</a>
+            <a href="/register">Crear cuenta</a>
           </div>
         </div>
       </div>
@@ -229,7 +228,7 @@ class LoginForm extends HTMLElement {
       }
 
       try {
-        const response = await fetch('/api/auth/login', {
+        const response = await fetch('/api/auth/customer/login', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(data)
@@ -244,9 +243,7 @@ class LoginForm extends HTMLElement {
         localStorage.setItem('token', result.token)
         localStorage.setItem('user', JSON.stringify(result.user))
 
-        store.dispatch(setUser(result.user))
-
-        window.location.href = '/admin/usuarios'
+        window.location.href = '/profile'
       } catch (err) {
         errorMessage.textContent = err.message
         errorMessage.classList.add('active')
@@ -258,4 +255,4 @@ class LoginForm extends HTMLElement {
   }
 }
 
-customElements.define('login-form-component', LoginForm)
+customElements.define('customer-login-component', CustomerLoginComponent)

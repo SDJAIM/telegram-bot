@@ -1,32 +1,11 @@
-class RegisterForm extends HTMLElement {
+class CustomerForgotPasswordComponent extends HTMLElement {
   constructor () {
     super()
     this.shadow = this.attachShadow({ mode: 'open' })
   }
 
-  async connectedCallback () {
-    await this.checkSignin()
+  connectedCallback () {
     this.render()
-  }
-
-  async checkSignin () {
-    try {
-      const response = await fetch('/api/auth/user/check-signin', {
-        method: 'GET',
-        credentials: 'include',
-        headers: {
-          'Content-Type': 'application/json'
-        }
-      })
-
-      if (response.ok) {
-        const data = await response.json()
-        window.location.href = data.redirection
-      }
-    } catch (error) {
-      // Usuario no autenticado, continuar mostrando register
-      console.log('No hay sesión activa')
-    }
   }
 
   render () {
@@ -38,7 +17,7 @@ class RegisterForm extends HTMLElement {
           padding: 0;
         }
 
-        .register-container {
+        .forgot-container {
           display: flex;
           justify-content: center;
           align-items: center;
@@ -47,7 +26,7 @@ class RegisterForm extends HTMLElement {
           padding: 1rem;
         }
 
-        .register-card {
+        .forgot-card {
           background: #ffffff;
           border-radius: 12px;
           box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
@@ -56,20 +35,20 @@ class RegisterForm extends HTMLElement {
           max-width: 400px;
         }
 
-        .register-header {
+        .forgot-header {
           text-align: center;
           margin-bottom: 2rem;
         }
 
-        .register-header h1 {
-          font-family: "Roboto", sans-serif;
+        .forgot-header h1 {
+          font-family: "Nunito Sans", sans-serif;
           font-size: 1.75rem;
           color: #333;
           margin-bottom: 0.5rem;
         }
 
-        .register-header p {
-          font-family: "Roboto", sans-serif;
+        .forgot-header p {
+          font-family: "Nunito Sans", sans-serif;
           color: #666;
           font-size: 0.9rem;
         }
@@ -80,7 +59,7 @@ class RegisterForm extends HTMLElement {
 
         .form-group label {
           display: block;
-          font-family: "Roboto", sans-serif;
+          font-family: "Nunito Sans", sans-serif;
           font-size: 0.875rem;
           color: #374151;
           font-weight: 500;
@@ -92,7 +71,7 @@ class RegisterForm extends HTMLElement {
           padding: 0.75rem 1rem;
           border: 1px solid #e5e7eb;
           border-radius: 8px;
-          font-family: "Roboto", sans-serif;
+          font-family: "Nunito Sans", sans-serif;
           font-size: 1rem;
           transition: all 0.2s ease;
           outline: none;
@@ -103,13 +82,9 @@ class RegisterForm extends HTMLElement {
           box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
         }
 
-        .form-group input.error {
-          border-color: #dc2626;
-        }
-
         .message {
           border-radius: 6px;
-          font-family: "Roboto", sans-serif;
+          font-family: "Nunito Sans", sans-serif;
           font-size: 0.875rem;
           padding: 0.75rem;
           margin-bottom: 1rem;
@@ -139,7 +114,7 @@ class RegisterForm extends HTMLElement {
           color: #ffffff;
           border: none;
           border-radius: 8px;
-          font-family: "Roboto", sans-serif;
+          font-family: "Nunito Sans", sans-serif;
           font-size: 1rem;
           font-weight: 600;
           cursor: pointer;
@@ -163,7 +138,7 @@ class RegisterForm extends HTMLElement {
         }
 
         .links a {
-          font-family: "Roboto", sans-serif;
+          font-family: "Nunito Sans", sans-serif;
           font-size: 0.875rem;
           color: #6366f1;
           text-decoration: none;
@@ -175,84 +150,50 @@ class RegisterForm extends HTMLElement {
           text-decoration: underline;
         }
 
-        .password-requirements {
-          margin-top: 0.5rem;
-          padding: 0.5rem;
-          background-color: #f3f4f6;
-          border-radius: 4px;
-        }
-
-        .password-requirements small {
-          font-family: "Roboto", sans-serif;
-          font-size: 0.75rem;
-          color: #6b7280;
-          display: block;
-        }
-
-        .message {
-          padding: 0.75rem;
-          border-radius: 6px;
-          font-family: "Roboto", sans-serif;
-          font-size: 0.875rem;
+        .back-home {
+          text-align: center;
           margin-bottom: 1rem;
-          display: none;
         }
 
-        .message.active {
-          display: block;
+        .back-home a {
+          font-family: "Nunito Sans", sans-serif;
+          font-size: 0.875rem;
+          color: #6366f1;
+          text-decoration: none;
+          display: inline-flex;
+          align-items: center;
+          gap: 0.5rem;
         }
 
-        .message.error {
-          background-color: #fef2f2;
-          border: 1px solid #fecaca;
-          color: #b91c1c;
-        }
-
-        .message.success {
-          background-color: #f0fdf4;
-          border: 1px solid #bbf7d0;
-          color: #166534;
+        .back-home a:hover {
+          text-decoration: underline;
         }
       </style>
 
-      <div class="register-container">
-        <div class="register-card">
-          <div class="register-header">
-            <h1>Crear Cuenta</h1>
-            <p>Completa los datos para registrarte</p>
+      <div class="forgot-container">
+        <div class="forgot-card">
+          <div class="back-home">
+            <a href="/">← Volver al inicio</a>
+          </div>
+
+          <div class="forgot-header">
+            <h1>Recuperar Contraseña</h1>
+            <p>Te enviaremos un enlace para resetear tu contraseña</p>
           </div>
 
           <div class="message"></div>
 
           <form>
             <div class="form-group">
-              <label for="name">Nombre</label>
-              <input type="text" id="name" name="name" required placeholder="Tu nombre">
-            </div>
-
-            <div class="form-group">
               <label for="email">Email</label>
               <input type="email" id="email" name="email" required placeholder="tu@email.com">
             </div>
 
-            <div class="form-group">
-              <label for="password">Contraseña</label>
-              <input type="password" id="password" name="password" required placeholder="Mínimo 8 caracteres">
-              <div class="password-requirements">
-                <small>La contraseña debe tener al menos 8 caracteres</small>
-              </div>
-            </div>
-
-            <div class="form-group">
-              <label for="confirmPassword">Confirmar Contraseña</label>
-              <input type="password" id="confirmPassword" name="confirmPassword" required placeholder="Repite la contraseña">
-            </div>
-
-            <button type="submit" class="submit-btn">Crear Cuenta</button>
+            <button type="submit" class="submit-btn">Enviar enlace</button>
           </form>
 
           <div class="links">
-            <a href="/admin/login">¿Ya tienes cuenta? Inicia sesión</a>
+            <a href="/login">Volver al inicio de sesión</a>
           </div>
         </div>
       </div>
@@ -270,37 +211,16 @@ class RegisterForm extends HTMLElement {
 
       const submitBtn = this.shadow.querySelector('.submit-btn')
       submitBtn.disabled = true
-      submitBtn.textContent = 'Registrando...'
+      submitBtn.textContent = 'Enviando...'
       message.classList.remove('active', 'error', 'success')
 
       const formData = new FormData(form)
-      const password = formData.get('password')
-      const confirmPassword = formData.get('confirmPassword')
-
-      if (password.length < 8) {
-        message.textContent = 'La contraseña debe tener al menos 8 caracteres'
-        message.classList.add('active', 'error')
-        submitBtn.disabled = false
-        submitBtn.textContent = 'Crear Cuenta'
-        return
-      }
-
-      if (password !== confirmPassword) {
-        message.textContent = 'Las contraseñas no coinciden'
-        message.classList.add('active', 'error')
-        submitBtn.disabled = false
-        submitBtn.textContent = 'Crear Cuenta'
-        return
-      }
-
       const data = {
-        name: formData.get('name'),
-        email: formData.get('email'),
-        password
+        email: formData.get('email')
       }
 
       try {
-        const response = await fetch('/api/auth/register', {
+        const response = await fetch('/api/auth/customer/forgot-password', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(data)
@@ -309,7 +229,7 @@ class RegisterForm extends HTMLElement {
         const result = await response.json()
 
         if (!response.ok) {
-          throw new Error(result.message || 'Error al registrar')
+          throw new Error(result.message || 'Error al enviar el enlace')
         }
 
         message.textContent = result.message
@@ -320,10 +240,10 @@ class RegisterForm extends HTMLElement {
         message.classList.add('active', 'error')
       } finally {
         submitBtn.disabled = false
-        submitBtn.textContent = 'Crear Cuenta'
+        submitBtn.textContent = 'Enviar enlace'
       }
     })
   }
 }
 
-customElements.define('register-form-component', RegisterForm)
+customElements.define('customer-forgot-password-component', CustomerForgotPasswordComponent)

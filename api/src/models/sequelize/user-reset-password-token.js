@@ -22,7 +22,7 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.INTEGER,
       allowNull: false,
       references: {
-        model: 'USERS',
+        model: 'users',
         key: 'id'
       }
     },
@@ -49,7 +49,7 @@ module.exports = (sequelize, DataTypes) => {
   }, {
     sequelize,
     modelName: 'UserResetPasswordToken',
-    tableName: 'USER_RESET_PASSWORD_TOKENS',
+    tableName: 'user_reset_password_tokens',
     timestamps: true,
     paranoid: false
   })
