@@ -3,11 +3,13 @@ class SubscriptionForm extends HTMLElement {
     super()
     this.shadow = this.attachShadow({ mode: 'open' })
     this.data = {}
+    this.endpoint = '/api/customer/customers'
   }
 
   async connectedCallback () {
     await this.loadData()
     await this.render()
+    this.bindEvents()
   }
 
   async loadData () {
@@ -21,11 +23,10 @@ class SubscriptionForm extends HTMLElement {
     }
   }
 
-  render () {
+  async render () {
     this.shadow.innerHTML =
     /* html */`
     <style>
-
       *{
         box-sizing: border-box;
       }
@@ -219,6 +220,10 @@ class SubscriptionForm extends HTMLElement {
         border-color: hsl(200, 77%, 52%);
       }
 
+      .form-element-input input:focus {
+        border-color: hsl(200, 77%, 52%);
+      }
+
       .form-element-button button{
         background-color: hsl(200, 77%, 52%);
         border-radius: 1rem;
@@ -235,6 +240,35 @@ class SubscriptionForm extends HTMLElement {
 
       .form-element-button button:hover{
         background-color: hsl(200, 77%, 42%);
+      }
+
+      .form-element-button button[disabled] {
+        opacity: 0.6;
+        cursor: not-allowed;
+      }
+
+      .form-element-button button[disabled]:hover {
+        background-color: hsl(200, 77%, 52%);
+      }
+
+      .message {
+        display: none;
+        padding: 1rem;
+        border-radius: 0.75rem;
+        font-weight: 600;
+        text-align: center;
+      }
+
+      .message.success {
+        display: block;
+        background: #dcfce7;
+        color: #166534;
+      }
+
+      .message.error {
+        display: block;
+        background: #fee2e2;
+        color: #991b1b;
       }
     </style>
 
@@ -268,17 +302,73 @@ class SubscriptionForm extends HTMLElement {
           <form>
             <div class="form-element">
               <div class="form-element-input">
-                <input type="text" placeholder="Dirección de correo">
+                <input type="text" name="name" placeholder="Nombre" required>
+              </div>
+            </div>
+            <div class="form-element">
+              <div class="form-element-input">
+                <input type="email" name="email" placeholder="Dirección de correo" required>
               </div>
             </div>
             <div class="form-element-button">
-              <button>${this.data.textButton}</button>
+              <button type="submit">${this.data.textButton}</button>
             </div>
           </form>
+          <div class="message"></div>
         </div>
       </div>
     </section>
     `
+  }
+
+  bindEvents () {
+    const form = this.shadow.querySelector('form')
+    const message = this.shadow.querySelector('.message')
+    const button = form.querySelector('button')
+
+    form.addEventListener('submit', async e => {
+      e.preventDefault()
+
+      if (button.disabled) return
+
+      message.className = 'message'
+
+      const name = form.name.value.trim()
+      const email = form.email.value.trim()
+
+      if (!name || !email || !email.includes('@')) {
+        message.textContent = 'Introduce un nombre y un correo válidos'
+        message.classList.add('error')
+        return
+      }
+
+      button.disabled = true
+      button.textContent = 'Enviando...'
+
+      try {
+        const res = await fetch(this.endpoint, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ name, email })
+        })
+
+        const data = await res.json()
+
+        if (!res.ok) {
+          throw new Error(data?.error || 'Error en el servidor')
+        }
+
+        message.textContent = 'Suscripción enviada correctamente'
+        message.classList.add('success')
+        form.reset()
+      } catch (err) {
+        message.textContent = err.message || 'No se pudo enviar la suscripción'
+        message.classList.add('error')
+      } finally {
+        button.disabled = false
+        button.textContent = this.data.textButton
+      }
+    })
   }
 }
 

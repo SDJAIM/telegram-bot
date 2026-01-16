@@ -1,4 +1,4 @@
-// Load environment variables first
+﻿// Load environment variables first
 console.log('Dialect cargado:', process.env.DATABASE_DIALECT)
 
 global.__basedir = __dirname
@@ -7,7 +7,7 @@ const { wss } = require('./src/services/websocket-service')
 const app = require('./src/app')
 const PORT = process.env.PORT || 8080
 
-const server = app.listen(PORT, () => {
+const server = app.listen(PORT, '0.0.0.0', () => {
   console.log('El servidor está corriendo en el puerto 8080.')
 })
 

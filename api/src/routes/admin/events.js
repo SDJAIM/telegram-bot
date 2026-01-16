@@ -8,6 +8,6 @@ router.get('/', validateAdmin, eventController.list)
 router.post('/', validateAdmin, eventController.create)
 router.get('/:id', validateAdmin, eventController.show)
 router.put('/:id', validateAdmin, eventController.update)
-router.delete('/:id', validateAdmin, eventController.delete)
+router.delete('/:id', validateAdmin, eventController.destroy)
 
 module.exports = router

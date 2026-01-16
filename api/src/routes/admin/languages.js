@@ -1,11 +1,12 @@
 const express = require('express')
 const router = express.Router()
-const controller = require('../../controllers/admin/language-controller')
+const controller = require('../../controllers/admin/languages-controller.js')
+const authUserCookie = require('../../middlewares/auth-user-cookie.js')
 
-router.post('/', controller.createLanguage)
-router.get('/', controller.getAllLanguages)
-router.get('/:id', controller.getLanguageById)
-router.put('/:id', controller.updateLanguage)
-router.delete('/:id', controller.deleteLanguage)
+router.post('/', [authUserCookie], controller.create)
+router.get('/', [authUserCookie], controller.findAll)
+router.get('/:id', [authUserCookie], controller.findOne)
+router.put('/:id', [authUserCookie], controller.update)
+router.delete('/:id', [authUserCookie], controller.delete)
 
 module.exports = router

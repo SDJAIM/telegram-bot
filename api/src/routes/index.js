@@ -2,7 +2,7 @@ const express = require('express')
 const router = express.Router()
 const { verifyToken } = require('../middlewares/auth.js')
 
-router.use('/auth', require('./auth'))
+router.use('/auth', require('./auth/auth-customers.js'))
 router.use('/auth/customer', require('./customer-auth'))
 
 router.use('/admin/users', verifyToken, require('./admin/users'))
