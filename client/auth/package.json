@@ -1,0 +1,16 @@
+{
+  "name": "auth",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "devDependencies": {
+    "eslint": "^9.18.0",
+    "neostandard": "^0.12.0",
+    "vite": "^6.3.5"
+  }
+}
