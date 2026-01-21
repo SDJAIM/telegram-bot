@@ -77,7 +77,8 @@ class NotFound extends HTMLElement
         align-items: center;
         justify-content: center;
         text-align: center;
-        background-color: #33CC99;
+        background: linear-gradient(to right, green, white);
+
       }
 
       .code404 {
@@ -131,10 +132,10 @@ class NotFound extends HTMLElement
     </style>
 
     <section class="errorPage">
+      
       <div class="code404">
         <h1>${this.data.title}</h1>
       </div>
-      <!-- 6 -->
       <div class="loader loader">
         <svg>${this.data.svg}</svg>
       </div>
