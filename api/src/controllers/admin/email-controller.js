@@ -1,11 +1,11 @@
 const sequelizeDb = require('../../models/sequelize')
-const Email = sequelizeDb.Email
+const SentEmail = sequelizeDb.SentEmail
 const Op = sequelizeDb.Sequelize.Op
 
 exports.create = async (req, res, next) => {
   try {
-    const data = await Email.create(req.body)
-    res.status(200).send(data)
+    const data = await SentEmail.create(req.body)
+    res.status(201).send(data)
   } catch (err) {
     if (err.name === 'SequelizeValidationError') {
       err.statusCode = 422
@@ -21,17 +21,29 @@ exports.findAll = async (req, res, next) => {
     const offset = (page - 1) * limit
     const whereStatement = {}
 
-    for (const key in req.query) {
-      if (req.query[key] !== '' && req.query[key] !== 'null' && key !== 'page' && key !== 'size') {
-        whereStatement[key] = { [Op.substring]: req.query[key] }
-      }
+    // Filter by userType if provided
+    if (req.query.userType) {
+      whereStatement.userType = req.query.userType
     }
 
-    const condition = Object.keys(whereStatement).length > 0 ? { [Op.and]: [whereStatement] } : {}
+    // Filter by userId if provided
+    if (req.query.userId) {
+      whereStatement.userId = req.query.userId
+    }
 
-    const result = await Email.findAndCountAll({
-      where: condition,
-      attributes: ['id', 'subject', 'path', 'createdAt', 'updatedAt'],
+    // Filter by emailTemplate if provided
+    if (req.query.emailTemplate) {
+      whereStatement.emailTemplate = { [Op.substring]: req.query.emailTemplate }
+    }
+
+    // Filter by read status if provided
+    if (req.query.readed !== undefined) {
+      whereStatement.readed = req.query.readed === 'true'
+    }
+
+    const result = await SentEmail.findAndCountAll({
+      where: whereStatement,
+      attributes: ['id', 'userId', 'userType', 'emailTemplate', 'sendAt', 'readed', 'readedAt', 'uuid', 'createdAt', 'updatedAt'],
       limit,
       offset,
       order: [['createdAt', 'DESC']]
@@ -53,11 +65,10 @@ exports.findAll = async (req, res, next) => {
 exports.findOne = async (req, res, next) => {
   try {
     const id = req.params.id
-    const data = await Email.findByPk(id)
+    const data = await SentEmail.findByPk(id)
 
     if (!data) {
-      const err = new Error()
-      err.message = `No se puede encontrar el elemento con la id=${id}.`
+      const err = new Error(`Email con id=${id} no encontrado`)
       err.statusCode = 404
       throw err
     }
@@ -71,17 +82,16 @@ exports.findOne = async (req, res, next) => {
 exports.update = async (req, res, next) => {
   try {
     const id = req.params.id
-    const [numberRowsAffected] = await Email.update(req.body, { where: { id } })
+    const [numberRowsAffected] = await SentEmail.update(req.body, { where: { id } })
 
     if (numberRowsAffected !== 1) {
-      const err = new Error()
-      err.message = `No se puede actualizar el elemento con la id=${id}. Tal vez no se ha encontrado.`
+      const err = new Error(`No se puede actualizar el email con id=${id}. Tal vez no se ha encontrado.`)
       err.statusCode = 404
       throw err
     }
 
     res.status(200).send({
-      message: 'El elemento ha sido actualizado correctamente.'
+      message: 'Email actualizado correctamente.'
     })
   } catch (err) {
     if (err.name === 'SequelizeValidationError') {
@@ -95,17 +105,16 @@ exports.update = async (req, res, next) => {
 exports.delete = async (req, res, next) => {
   try {
     const id = req.params.id
-    const numberRowsAffected = await Email.destroy({ where: { id } })
+    const numberRowsAffected = await SentEmail.destroy({ where: { id } })
 
     if (numberRowsAffected !== 1) {
-      const err = new Error()
-      err.message = `No se puede actualizar el elemento con la id=${id}. Tal vez no se ha encontrado.`
+      const err = new Error(`No se puede borrar el email con id=${id}. Tal vez no se ha encontrado.`)
       err.statusCode = 404
       throw err
     }
 
     res.status(200).send({
-      message: 'El elemento ha sido borrado correctamente.'
+      message: 'Email borrado correctamente.'
     })
   } catch (err) {
     next(err)
