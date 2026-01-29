@@ -8,6 +8,7 @@ const Customer = sequelizeDb.Customer
 const CustomerCredential = sequelizeDb.CustomerCredential
 const CustomerActivationToken = sequelizeDb.CustomerActivationToken
 const CustomerResetPasswordToken = sequelizeDb.CustomerResetPasswordToken
+const BotVerification = sequelizeDb.BotVerification
 
 const SALT_ROUNDS = 10
 const JWT_EXPIRATION = '24h'
@@ -15,6 +16,12 @@ const ACTIVATION_TOKEN_EXPIRATION_HOURS = 24
 const RESET_TOKEN_EXPIRATION_HOURS = 1
 
 const generateToken = () => crypto.randomBytes(32).toString('hex')
+
+// Generate a secure 6-digit verification code (000000-999999)
+const generateVerificationCode = () => {
+  const code = crypto.randomInt(0, 1000000)
+  return code.toString().padStart(6, '0')
+}
 
 exports.register = async (req, res, next) => {
   const transaction = await sequelizeDb.sequelize.transaction()
@@ -68,13 +75,36 @@ exports.register = async (req, res, next) => {
 
     await transaction.commit()
 
+    // Generate 6-digit verification code for Telegram bot
+    const verificationCode = generateVerificationCode()
+
+    try {
+      await BotVerification.create({
+        email: customer.email,
+        verificationCode,
+        telegramUserId: null
+      })
+    } catch (botVerErr) {
+      console.error('Error creando verificacion de bot:', botVerErr)
+      // Continue even if bot verification creation fails
+    }
+
+    // Get bot name from environment or use default
+    const botName = process.env.TELEGRAM_CUSTOMER_BOT_NAME || 'ChatBot'
+
     try {
       const emailService = new EmailService(process.env.EMAIL_TYPE || 'smtp')
       emailService.sendEmail(
         { id: customer.id, email: customer.email, language: 'es' },
         'customer',
-        'activationUrl',
-        { activationToken, userName: customer.name }
+        'activationTelegramBot',
+        {
+          activationToken,
+          userName: customer.name,
+          email: customer.email,
+          verificationCode,
+          botName
+        }
       )
     } catch (emailErr) {
       console.error('Error enviando email de activacion:', emailErr)
