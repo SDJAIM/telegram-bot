@@ -22,7 +22,16 @@
       "Bash(done)",
       "Bash(if [ ! -f \"e:\\\\susan\\\\git\\\\telegram-bot\\\\client\\\\admin\\\\front-admin$file\" ])",
       "Bash(if [ ! -f \"e:\\\\susan\\\\git\\\\telegram-bot\\\\client\\\\customer\\\\front-customer$file\" ])",
-      "Bash(for dir in */)"
+      "Bash(for dir in */)",
+      "Bash(for file in index.js package.json .env.example .sequelizerc eslint.config.js)",
+      "Bash(do if [ -f \"$file\" ])",
+      "Bash(then echo \"✓ $file exists\")",
+      "Bash(else echo \"✗ $file MISSING\")",
+      "Bash(wc:*)",
+      "Bash(find:*)",
+      "Bash(node --env-file=.env --check:*)",
+      "Bash(node:*)",
+      "Bash(node --check:*)"
     ]
   }
 }

@@ -1,6 +1,4 @@
 // Load environment variables first
-console.log('Dialect cargado:', process.env.DATABASE_DIALECT)
-
 global.__basedir = __dirname
 
 const { wss } = require('./src/services/websocket-service')
