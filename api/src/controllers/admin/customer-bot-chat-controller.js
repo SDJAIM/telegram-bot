@@ -1,48 +1,48 @@
 const sequelizeDb = require('../../models/sequelize')
-const CustomerBot = sequelizeDb.CustomerBot
+const CustomerBotChat = sequelizeDb.CustomerBotChat
 const Op = sequelizeDb.Sequelize.Op
 
-exports.create = async (req, res, next) => {
-  try {
-    const data = await CustomerBot.create(req.body)
-    res.status(200).send(data)
-  } catch (err) {
-    if (err.name === 'SequelizeValidationError') {
-      err.statusCode = 422
-    }
-    next(err)
-  }
-}
-
-exports.findAll = async (req, res, next) => {
+exports.getAll = async (req, res, next) => {
   try {
     const page = parseInt(req.query.page) || 1
     const limit = parseInt(req.query.size) || 10
     const offset = (page - 1) * limit
     const whereStatement = {}
-    whereStatement.customerId = req.query.customerId
 
-    for (const key in req.query) {
-      if (req.query[key] !== '' && req.query[key] !== 'null' && key !== 'page' && key !== 'size') {
-        whereStatement[key] = { [Op.substring]: req.query[key] }
-      }
+    // Filter by customerBotId if provided
+    if (req.query.customerBotId) {
+      whereStatement.customerBotId = req.query.customerBotId
     }
 
-    const condition = Object.keys(whereStatement).length > 0 ? { [Op.and]: [whereStatement] } : {}
+    // Filter by emisor if provided
+    if (req.query.emisor) {
+      whereStatement.emisor = req.query.emisor
+    }
 
-    const result = await CustomerBot.findAndCountAll({
-      where: condition,
-      attributes: ['id', 'botId', 'createdAt', 'updatedAt'],
-      limit,
-      offset,
-      order: [['createdAt', 'DESC']],
+    const result = await CustomerBotChat.findAndCountAll({
+      where: whereStatement,
       include: [
         {
-          model: sequelizeDb.Bot,
-          as: 'bot',
-          attributes: ['id', 'name']
+          model: sequelizeDb.CustomerBot,
+          as: 'customerBot',
+          attributes: ['id', 'customerId', 'botId', 'status'],
+          include: [
+            {
+              model: sequelizeDb.Customer,
+              as: 'customer',
+              attributes: ['id', 'name', 'email']
+            },
+            {
+              model: sequelizeDb.Bot,
+              as: 'bot',
+              attributes: ['id', 'name', 'platform']
+            }
+          ]
         }
-      ]
+      ],
+      limit,
+      offset,
+      order: [['createdAt', 'DESC']]
     })
 
     result.meta = {
@@ -58,24 +58,32 @@ exports.findAll = async (req, res, next) => {
   }
 }
 
-exports.findOne = async (req, res, next) => {
+exports.getOne = async (req, res, next) => {
   try {
     const id = req.params.id
-    const data = await CustomerBot.findByPk(id, {
-      attributes: ['id', 'botId'],
+    const data = await CustomerBotChat.findByPk(id, {
       include: [
         {
-          model: sequelizeDb.CustomerBotChat,
-          as: 'customerBotChats',
-          attributes: ['emisor', 'message', 'createdAt'],
-          order: [['createdAt', 'DESC']]
+          model: sequelizeDb.CustomerBot,
+          as: 'customerBot',
+          include: [
+            {
+              model: sequelizeDb.Customer,
+              as: 'customer',
+              attributes: ['id', 'name', 'email']
+            },
+            {
+              model: sequelizeDb.Bot,
+              as: 'bot',
+              attributes: ['id', 'name', 'platform']
+            }
+          ]
         }
       ]
     })
 
     if (!data) {
-      const err = new Error()
-      err.message = `No se puede encontrar el elemento con la id=${id}.`
+      const err = new Error('Chat no encontrado')
       err.statusCode = 404
       throw err
     }
@@ -86,26 +94,34 @@ exports.findOne = async (req, res, next) => {
   }
 }
 
-exports.update = async (req, res, next) => {
+exports.create = async (req, res, next) => {
   try {
-    const id = req.params.id
-    const [numberRowsAffected] = await CustomerBot.update(req.body, { where: { id } })
-
-    if (numberRowsAffected !== 1) {
-      const err = new Error()
-      err.message = `No se puede actualizar el elemento con la id=${id}. Tal vez no se ha encontrado.`
-      err.statusCode = 404
-      throw err
-    }
-
-    res.status(200).send({
-      message: 'El elemento ha sido actualizado correctamente.'
-    })
+    const data = await CustomerBotChat.create(req.body)
+    res.status(201).send(data)
   } catch (err) {
     if (err.name === 'SequelizeValidationError') {
       err.statusCode = 422
     }
+    next(err)
+  }
+}
 
+exports.update = async (req, res, next) => {
+  try {
+    const id = req.params.id
+    const [numberRowsAffected] = await CustomerBotChat.update(req.body, { where: { id } })
+
+    if (numberRowsAffected !== 1) {
+      const err = new Error('Chat no encontrado o no actualizado')
+      err.statusCode = 404
+      throw err
+    }
+
+    res.status(200).send({ message: 'Chat actualizado correctamente' })
+  } catch (err) {
+    if (err.name === 'SequelizeValidationError') {
+      err.statusCode = 422
+    }
     next(err)
   }
 }
@@ -113,18 +129,15 @@ exports.update = async (req, res, next) => {
 exports.delete = async (req, res, next) => {
   try {
     const id = req.params.id
-    const numberRowsAffected = await CustomerBot.destroy({ where: { id } })
+    const numberRowsAffected = await CustomerBotChat.destroy({ where: { id } })
 
     if (numberRowsAffected !== 1) {
-      const err = new Error()
-      err.message = `No se puede actualizar el elemento con la id=${id}. Tal vez no se ha encontrado.`
+      const err = new Error('Chat no encontrado')
       err.statusCode = 404
       throw err
     }
 
-    res.status(200).send({
-      message: 'El elemento ha sido borrado correctamente.'
-    })
+    res.status(200).send({ message: 'Chat eliminado correctamente' })
   } catch (err) {
     next(err)
   }

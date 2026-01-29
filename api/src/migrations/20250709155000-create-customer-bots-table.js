@@ -2,30 +2,36 @@
 
 module.exports = {
   async up (queryInterface, Sequelize) {
-    await queryInterface.createTable('customer_bot_chats', {
+    await queryInterface.createTable('customer_bots', {
       id: {
         allowNull: false,
         autoIncrement: true,
         primaryKey: true,
         type: Sequelize.INTEGER
       },
-      customerBotId: {
+      customerId: {
         type: Sequelize.INTEGER,
         allowNull: false,
         references: {
-          model: 'customer_bots',
+          model: 'customers',
           key: 'id'
         },
         onUpdate: 'CASCADE',
         onDelete: 'CASCADE'
       },
-      emisor: {
-        type: Sequelize.ENUM('customer', 'bot'),
+      botId: {
+        type: Sequelize.INTEGER,
         allowNull: false,
-        comment: 'Who sent the message: customer or bot'
+        references: {
+          model: 'bots',
+          key: 'id'
+        },
+        onUpdate: 'CASCADE',
+        onDelete: 'CASCADE'
       },
-      message: {
-        type: Sequelize.TEXT,
+      status: {
+        type: Sequelize.ENUM('active', 'inactive', 'suspended'),
+        defaultValue: 'active',
         allowNull: false
       },
       createdAt: {
@@ -41,13 +47,14 @@ module.exports = {
       }
     })
 
-    // Add index for faster queries
-    await queryInterface.addIndex('customer_bot_chats', ['customerBotId'], {
-      name: 'customer_bot_chats_customer_bot_id_index'
+    // Add unique constraint to prevent duplicate customer-bot pairs
+    await queryInterface.addIndex('customer_bots', ['customerId', 'botId'], {
+      unique: true,
+      name: 'customer_bots_customer_bot_unique'
     })
   },
 
   async down (queryInterface, Sequelize) {
-    await queryInterface.dropTable('customer_bot_chats')
+    await queryInterface.dropTable('customer_bots')
   }
 }

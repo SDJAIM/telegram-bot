@@ -117,7 +117,7 @@ exports.delete = async (req, res, next) => {
 
     if (numberRowsAffected !== 1) {
       const err = new Error()
-      err.message = `No se puede actualizar el elemento con la id=${id}. Tal vez no se ha encontrado.`
+      err.message = `No se puede borrar el elemento con la id=${id}. Tal vez no se ha encontrado.`
       err.statusCode = 404
       throw err
     }
