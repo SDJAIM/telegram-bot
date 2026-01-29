@@ -2,9 +2,12 @@ const express = require('express')
 const router = express.Router()
 const { verifyToken } = require('../middlewares/auth.js')
 
-router.use('/auth', require('./auth'))
-router.use('/auth/customer', require('./customer-auth'))
+// Auth routes (refactored structure)
+router.use('/auth', require('./auth/auth-activates'))
+router.use('/auth/user', require('./auth/auth-users'))
+router.use('/auth/customer', require('./auth/auth-customers'))
 
+// Admin routes (ALL PROTECTED with verifyToken)
 router.use('/admin/users', verifyToken, require('./admin/users'))
 router.use('/admin/customers', verifyToken, require('./admin/customers'))
 router.use('/admin/bots', verifyToken, require('./admin/bots'))
@@ -21,10 +24,13 @@ router.use('/admin/languages', verifyToken, require('./admin/languages'))
 router.use('/admin/promoters', verifyToken, require('./admin/promoters'))
 router.use('/admin/promoter-spots', verifyToken, require('./admin/promoter-spots'))
 router.use('/admin/towns', verifyToken, require('./admin/towns'))
+router.use('/admin/emails', verifyToken, require('./admin/emails'))
 
+// Customer routes
 router.use('/customer/faqs', require('./customer/faqs'))
 router.use('/customer/heroes', require('./customer/heroes'))
 router.use('/customer/chats', require('./customer/chats'))
 router.use('/customer/search', require('./customer/search'))
+router.use('/customer/customers', require('./customer/customer'))
 
 module.exports = router

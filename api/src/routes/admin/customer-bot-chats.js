@@ -1,13 +1,12 @@
-const router = require('express').Router()
-const controller = require('../../controllers/admin/customer-bot-chat-controller')
+const express = require('express')
+const router = express.Router()
+const controller = require('../../controllers/admin/customer-bot-chats.js')
+const authUserCookie = require('../../middlewares/auth-user-cookie.js')
 
-router.route('/')
-  .get(controller.getAll)
-  .post(controller.create)
-
-router.route('/:id')
-  .get(controller.getOne)
-  .put(controller.update)
-  .delete(controller.delete)
+router.post('/', [authUserCookie], controller.create)
+router.get('/', [authUserCookie], controller.findAll)
+router.get('/:id', [authUserCookie], controller.findOne)
+router.put('/:id', [authUserCookie], controller.update)
+router.delete('/:id', [authUserCookie], controller.delete)
 
 module.exports = router

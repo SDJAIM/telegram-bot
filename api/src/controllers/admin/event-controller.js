@@ -46,7 +46,7 @@ module.exports = {
     }
   },
 
-  async delete (req, res) {
+  async destroy (req, res) {
     try {
       const event = await Event.findByPk(req.params.id)
       if (!event) return notFoundError('Event not found', req, res)

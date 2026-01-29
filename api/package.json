@@ -30,6 +30,7 @@
   },
   "dependencies": {
     "bcrypt": "^6.0.0",
+    "bcryptjs": "^3.0.3",
     "chromadb": "^3.0.17",
     "connect-redis": "^7.1.1",
     "ejs": "^3.1.10",

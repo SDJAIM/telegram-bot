@@ -1,4 +1,4 @@
-const express = require('express')
+﻿const express = require('express')
 const app = express()
 
 const errorHandler = require('./middlewares/error-handler')
@@ -8,7 +8,7 @@ const exposeServiceMiddleware = require('./middlewares/expose-services')
 
 const { createClient } = require('redis')
 const session = require('express-session')
-const { RedisStore } = require('connect-redis')
+const RedisStore = require('connect-redis').default
 
 const redisClient = createClient({ url: process.env.REDIS_URL })
 redisClient.connect().catch(console.error)

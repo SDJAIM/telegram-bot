@@ -31,7 +31,9 @@
       "Bash(find:*)",
       "Bash(node --env-file=.env --check:*)",
       "Bash(node:*)",
-      "Bash(node --check:*)"
+      "Bash(node --check:*)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)"
     ]
   }
 }

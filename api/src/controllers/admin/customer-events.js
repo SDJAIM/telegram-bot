@@ -1,10 +1,10 @@
 const sequelizeDb = require('../../models/sequelize')
-const CustomerBot = sequelizeDb.CustomerBot
+const CustomerEvents = sequelizeDb.CustomerEvents
 const Op = sequelizeDb.Sequelize.Op
 
 exports.create = async (req, res, next) => {
   try {
-    const data = await CustomerBot.create(req.body)
+    const data = await CustomerEvents.create(req.body)
     res.status(200).send(data)
   } catch (err) {
     if (err.name === 'SequelizeValidationError') {
@@ -20,7 +20,6 @@ exports.findAll = async (req, res, next) => {
     const limit = parseInt(req.query.size) || 10
     const offset = (page - 1) * limit
     const whereStatement = {}
-    whereStatement.customerId = req.query.customerId
 
     for (const key in req.query) {
       if (req.query[key] !== '' && req.query[key] !== 'null' && key !== 'page' && key !== 'size') {
@@ -28,21 +27,16 @@ exports.findAll = async (req, res, next) => {
       }
     }
 
-    const condition = Object.keys(whereStatement).length > 0 ? { [Op.and]: [whereStatement] } : {}
+    const condition = Object.keys(whereStatement).length > 0
+      ? { [Op.and]: [whereStatement] }
+      : {}
 
-    const result = await CustomerBot.findAndCountAll({
+    const result = await CustomerEvents.findAndCountAll({
       where: condition,
-      attributes: ['id', 'botId', 'createdAt', 'updatedAt'],
+      attributes: ['id', 'customerId', 'eventId', 'createdAt', 'updatedAt'],
       limit,
       offset,
-      order: [['createdAt', 'DESC']],
-      include: [
-        {
-          model: sequelizeDb.Bot,
-          as: 'bot',
-          attributes: ['id', 'name']
-        }
-      ]
+      order: [['createdAt', 'DESC']]
     })
 
     result.meta = {
@@ -61,17 +55,7 @@ exports.findAll = async (req, res, next) => {
 exports.findOne = async (req, res, next) => {
   try {
     const id = req.params.id
-    const data = await CustomerBot.findByPk(id, {
-      attributes: ['id', 'botId'],
-      include: [
-        {
-          model: sequelizeDb.CustomerBotChat,
-          as: 'customerBotChats',
-          attributes: ['emisor', 'message', 'createdAt'],
-          order: [['createdAt', 'DESC']]
-        }
-      ]
-    })
+    const data = await CustomerEvents.findByPk(id)
 
     if (!data) {
       const err = new Error()
@@ -89,7 +73,7 @@ exports.findOne = async (req, res, next) => {
 exports.update = async (req, res, next) => {
   try {
     const id = req.params.id
-    const [numberRowsAffected] = await CustomerBot.update(req.body, { where: { id } })
+    const [numberRowsAffected] = await CustomerEvents.update(req.body, { where: { id } })
 
     if (numberRowsAffected !== 1) {
       const err = new Error()
@@ -113,7 +97,7 @@ exports.update = async (req, res, next) => {
 exports.delete = async (req, res, next) => {
   try {
     const id = req.params.id
-    const numberRowsAffected = await CustomerBot.destroy({ where: { id } })
+    const numberRowsAffected = await CustomerEvents.destroy({ where: { id } })
 
     if (numberRowsAffected !== 1) {
       const err = new Error()
