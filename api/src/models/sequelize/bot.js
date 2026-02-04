@@ -1,5 +1,5 @@
 module.exports = function (sequelize, DataTypes) {
-  const Model = sequelize.define('bot',
+  const Model = sequelize.define('Bot',
     {
       id: {
         type: DataTypes.INTEGER,

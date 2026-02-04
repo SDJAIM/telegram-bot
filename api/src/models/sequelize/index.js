@@ -35,6 +35,8 @@ fs.readdirSync(__dirname)
   })
 
 Object.keys(sequelizeDb).forEach(modelName => {
+  console.log('MODELOS CARGADOS =>', Object.keys(sequelizeDb))
+
   if (sequelizeDb[modelName].associate) {
     sequelizeDb[modelName].associate(sequelizeDb)
   }

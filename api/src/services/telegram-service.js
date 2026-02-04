@@ -13,7 +13,7 @@ class TelegramService {
 
   async escalateToHuman (threadId, preview) {
     const text =
-      `🆘 Nuevo caso [${threadId}]\n` +
+      ` Nuevo caso [${threadId}]\n` +
       `Último mensaje: ${preview || '—'}\n` +
       'Responde a este mensaje con *reply* para contestar al usuario.'
 
@@ -48,7 +48,7 @@ class TelegramService {
 
     if (!anchorId) return
 
-    await this.bot.sendMessage(this.groupId, `👤 Usuario: ${text}`, {
+    await this.bot.sendMessage(this.groupId, ` Usuario: ${text}`, {
       reply_to_message_id: anchorId
     })
   }
